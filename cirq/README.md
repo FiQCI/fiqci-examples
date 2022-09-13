@@ -4,10 +4,10 @@ Examples made through Cirq which are optimised for use on Helmi. These examples 
 
 ## Example list
 
-| Example                                              | Code                    | Quick run                                     |   |   |
-|------------------------------------------------------|-------------------------|-----------------------------------------------------------|---|---|
-| [Qubit Flipping]( #qubit-flipping)                   | `qb_flip_cirq.py`     | `python qb_flip_cirq.py --backend helmi`  |   |   |
-| [GHZ state]( #ghz-state)                             | `ghz.py`                | `python ghz.py --backend helmi`              |   |   |
+| Example                            | Code              | Quick run                                |
+|------------------------------------|-------------------|------------------------------------------|
+| [Qubit Flipping]( #qubit-flipping) | `qb_flip_cirq.py` | `python qb_flip_cirq.py --backend helmi` |
+| [GHZ state]( #ghz-state)           | `ghz.py`          | `python ghz.py --backend helmi`          |
 
 All examples have command line arguments which can be viewed with the `-h` or `--help` option. You can run the scripts with the `-h` option in the login node. Using this also prints some example usage for each example. Each example also has the verbose option built in, add the `-v` or `--verbose` command line argument. 
 
