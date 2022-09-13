@@ -144,15 +144,25 @@ def main():
 
         counts = job.result().get_counts()
 
-        # print(counts)
         t2 = ((counts['00'] + counts['11'])/shots)*100
 
-        c3 = (1-np.abs(counts['00']/shots-0.5))*100
-        c4 = (1-np.abs(counts['11']/shots-0.5))*100
+        counts_00 = (counts['00']/shots)*100
+        counts_11 = (counts['11']/shots)*100
+        
+        if '10' in counts:
+            counts_10 = (counts['10']/shots)*100
+        else:
+            counts_10 = 0
 
-        print (offset2+'Success probability |00> = ', round(c3,2),'%')
-        print (offset2+'Success probability |11> = ', round(c4,2),'%')
-        print (offset2+'Total Success probability = ', round(t2,2),'%')
+        if '01' in counts:
+            counts_01 = (counts['01']/shots)*100
+        else:
+            counts_01 = 0
+        print (offset2+' Percentage counts |00> = ', round(counts_00,2),'%')
+        print (offset2+' Percentage counts |11> = ', round(counts_11,2),'%')
+        print (offset2+' Percentage counts |10> = ', round(counts_10,2),'%')
+        print (offset2+' Percentage counts |01> = ', round(counts_01,2),'%')
+        print (offset2+' Percentage of counts |00> or |11> = ', round(t2,2),'%')
 
         print(offset+'Control: QB3'+'  Target QB'+str(qb+1)+' -> ')
         qreg = QuantumRegister(2, 'qB')
@@ -186,18 +196,27 @@ def main():
         # #Run job on the QC
         job = backend.run(qc_decomposed, shots=shots, qubit_mapping=qubit_mapping)
 
-        # print(job.result())
         counts = job.result().get_counts()
 
-        # print(counts)
         t2 = ((counts['00'] + counts['11'])/shots)*100
 
-        c3 = (1-np.abs(counts['00']/shots-0.5))*100
-        c4 = (1-np.abs(counts['11']/shots-0.5))*100
+        counts_00 = (counts['00']/shots)*100
+        counts_11 = (counts['11']/shots)*100
+        
+        if '10' in counts:
+            counts_10 = (counts['10']/shots)*100
+        else:
+            counts_10 = 0
 
-        print (offset2+'Success probability |00> = ', round(c3,2),'%')
-        print (offset2+'Success probability |11> = ', round(c4,2),'%')
-        print (offset2+'Total Success probability = ', round(t2,2),'%')
+        if '01' in counts:
+            counts_01 = (counts['01']/shots)*100
+        else:
+            counts_01 = 0
+        print (offset2+' Percentage counts |00> = ', round(counts_00,2),'%')
+        print (offset2+' Percentage counts |11> = ', round(counts_11,2),'%')
+        print (offset2+' Percentage counts |10> = ', round(counts_10,2),'%')
+        print (offset2+' Percentage counts |01> = ', round(counts_01,2),'%')
+        print (offset2+' Percentage of counts |00> or |11> = ', round(t2,2),'%')
 
 
 
