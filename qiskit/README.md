@@ -102,11 +102,3 @@ qB_4: ────────────────╫───────�
     or Kolmogorov distance
     It is another measure of the distinguishability between two quantum states
 
-
-
-
-
-
-
-
-
