@@ -99,6 +99,17 @@ def get_args():
     )
 
     args_parser.add_argument(
+        "--number",
+        help="""
+        Choose the random bit string number in decimal form
+        E.g --number 7.
+        """,
+        required=False,
+        type=int,
+        default=None,
+    )
+
+    args_parser.add_argument(
         "--repeats",
         help="""
         Number of repeats of the repeated Quantum Run
@@ -260,11 +271,13 @@ def most_frequent(lst):
 
 
 def main():
-
-    NUM = None
-
     args = get_args()
 
+    # NUM = None
+
+    NUM = args.number
+    if NUM > 15:
+        sys.exit("ERROR! Guess must be a 4 bit string number or lower. Less than or equal to 15.")
     global verbose
 
     verbose = args.verbose
@@ -318,9 +331,7 @@ def main():
     if args.option == 1:
 
         guess = bv.quantum(shots=10000)
-        # print(guess)
 
-        # results=list(guess.data[0:5].T.to_numpy()[0])
         s, amt = most_frequent(guess)
         success_rate = round((amt / 1000) * 100, 2)
         print(s, amt)
