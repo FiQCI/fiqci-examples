@@ -207,10 +207,12 @@ class BVoracle:
         qc = helmi.routing(qc)
 
         if verbose == True:
+            print_header("Routed circuit")
             print(qc.draw())
 
         qc_decomposed = transpile(qc, basis_gates=basis_gates)
         if verbose == True:
+            print_header("Decomposed circuit")
             print(qc_decomposed.draw())
 
         # Map virtual and physical qubits (routing)
