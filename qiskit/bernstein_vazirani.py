@@ -15,6 +15,19 @@ from csc_qu_tools.qiskit import Helmi as helmi
 """
 
 This example shows the Bernstein-Vazirani Algorithm. 
+Bernstein-Vazirani Algorithm is an extension of the Deutsch-Joza algorithm. The algorithm tries to search for a bit string from a hidden function. 
+
+The Solution:
+
+- Intialize the qubits to |0> state and an output qubit to |->
+- Apply Hadamard gates to the input qubits
+- Call the BV Oracle
+- Apply Hadamard gates to the input qubits
+- Measure
+
+This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence only needing a classical register of size 4 despite having a quantum register of size 5. 
+
+
 """
 offset = " " * 37
 offset_2 = " " * 10
@@ -30,9 +43,10 @@ def get_args():
         From this we can measure the trace distance between QB3 and each of the other qubits.""",
         formatter_class=RawTextHelpFormatter,
         epilog="""Example usage:
-        python ghz.py --backend simulator
-        python ghz.py --backend simulator --noise
-        python ghz.py --backend simulator --verbose (prints circuits)
+	python bernstein_vazirani.py --backend helmi
+        python bernstein_vazirani.py --backend simulator
+        python bernstein_vazirani.py --backend simulator --noise
+        python bernstein_vazirani.py --backend helmi -v (prints circuits)
         """,
     )
     # Parse Arguments
@@ -177,11 +191,7 @@ class BVoracle:
         for i in range(4):
             qc.h(i)
 
-        qc.barrier()
-
         qc.measure(range(4), range(4))
-
-        # qc.measure(5,5)
 
         qc = helmi.routing(qc)
 
