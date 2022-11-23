@@ -71,6 +71,10 @@ The `bell_states_qiskit.py` creates a `|00> + |11> / sqrt(2)` bell state between
 
 The Bernstein-Vazirani algorithm attempts to solve the problem of finding some secret string that has been encoded by a black-box algorithm. In this example, the quantum version is implemented with a hidden oracle number randomly chosen and not disclosed. The quantum oracle function is created using hadamard and Z gates in a 5 qubit system to successfully find the hidden secret bit string after numerous attempts. 
 
+
+This example sends a 5 qubit circuit to Helmi, however the first 4 qubits are used for the algorithm. The 5th qubit here is used as an output qubit. `helmi.routing` is also utilised in this example. 
+
+
 ### GHZ state 
 
 The GHZ example is a 5 qubit alternative to the bell state example. This time a bell state is between between one of the outer qubits and the inner qubit, QB3. The classical fidelity and trace distance is calculated for each qubit pair this time. The GHZ example finally prepares a 5 qubit GHZ state and efficiently maps this for Helmi's topology 
