@@ -82,8 +82,6 @@ def main():
 
     args = get_args()
 
-    print(args)
-
     print("Running on backend = ", args.backend)
 
     if args.backend == "simulator" or args.backend == "aer":
