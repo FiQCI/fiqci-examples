@@ -229,7 +229,17 @@ class BVoracle:
                 virtual_qubits[4]: "QB5",
             }
 
-        elif str(backend) == "aer_simulator":
+        elif "fake_helmi" in str(backend):
+            virtual_qubits = qc_decomposed.qubits
+            qubit_mapping = {
+                virtual_qubits[0]: "QB1",
+                virtual_qubits[1]: "QB2",
+                virtual_qubits[2]: "QB3",
+                virtual_qubits[3]: "QB4",
+                virtual_qubits[4]: "QB5",
+            }
+
+        else:
             virtual_qubits = qc_decomposed.qubits
             qubit_mapping = None
 
@@ -278,10 +288,8 @@ def most_frequent(lst):
 def main():
     args = get_args()
 
-    # NUM = None
-
     NUM = args.number
-    if NUM > 15:
+    if NUM is not None and NUM > 15:
         sys.exit("ERROR! Guess must be a 4 bit string number or lower. Less than or equal to 15.")
     global verbose
 
@@ -293,16 +301,13 @@ def main():
         from qiskit.providers.aer import AerSimulator
 
         if args.noise == True:
-            import qiskit.providers.aer.noise as noise
+            from csc_qu_tools.qiskit.mock import FakeHelmi
 
             print(
-                "Inducing artificial noise into Simulator with a DepolarizingChannel p=0.01"
+                "Inducing artificial noise into Simulator with FakeHelmi Noise Model"
             )
-            error = noise.depolarizing_error(0.01, 1)
-            noise_model = noise.NoiseModel()
-            noise_model.add_all_qubit_quantum_error(error, ["r"])
             basis_gates = ["r", "cz"]
-            backend = AerSimulator(noise_model=noise_model)
+            backend = FakeHelmi()
         else:
             basis_gates = ["r", "cz"]
             backend = AerSimulator()

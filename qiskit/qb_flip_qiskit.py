@@ -157,7 +157,7 @@ def flip_qubits(backend_dict, qubit, option: int):
     qc_decomposed = transpile(qc, basis_gates=basis_gates)
 
     # Map virtual and physical qubits (routing)
-    if "IQMBackend" in str(backend):
+    if "IQMBackend" or "fake_helmi" in str(backend):
         virtual_qubits = qc_decomposed.qubits
         if option == 1:
             qubit_mapping = {virtual_qubits[0]: "QB" + str(qubit + 1)}
@@ -207,16 +207,13 @@ def main():
         from qiskit.providers.aer import AerSimulator
 
         if args.noise == True:
-            import qiskit.providers.aer.noise as noise
+            from csc_qu_tools.qiskit.mock import FakeHelmi
 
             print(
-                "Inducing artificial noise into Simulator with a DepolarizingChannel p=0.01"
+                "Inducing artificial noise into Simulator with FakeHelmi Noise Model"
             )
-            error = noise.depolarizing_error(0.01, 1)
-            noise_model = noise.NoiseModel()
-            noise_model.add_all_qubit_quantum_error(error, ["r"])
             basis_gates = ["r", "cz"]
-            backend = AerSimulator(noise_model=noise_model)
+            backend = FakeHelmi()
         else:
             basis_gates = ["r", "cz"]
             backend = AerSimulator()
