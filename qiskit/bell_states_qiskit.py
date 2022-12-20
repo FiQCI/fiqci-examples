@@ -203,14 +203,12 @@ def main():
                 virtual_qubits[0]: "QB" + str(qb + 1),
                 virtual_qubits[1]: "QB3",
             }
-
-        if "fake_helmi" in str(backend):
+        elif "fake_helmi" in str(backend):
             virtual_qubits = qc_decomposed.qubits
             qubit_mapping = {
                 virtual_qubits[0]: "QB" + str(qb + 1),
                 virtual_qubits[1]: "QB3",
             }
-
         else:
             virtual_qubits = qc_decomposed.qubits
             qubit_mapping = None
