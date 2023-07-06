@@ -65,10 +65,10 @@ def calculate_success_probability(counts: dict, shots: int, desired_state: str) 
 
 def main():
 
-    SERVER_URL = os.getenv('SERVER_URL')
-    if not SERVER_URL:
-        raise ValueError("Environment variable SERVER_URL is not set")
-    provider = IQMProvider(SERVER_URL)
+    HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
+    if not HELMI_CORTEX_URL:
+        raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    provider = IQMProvider(HELMI_CORTEX_URL)
     backend = provider.get_backend()
 
     shots = 1000
