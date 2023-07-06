@@ -1,36 +1,34 @@
-import qiskit
+import os
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from qiskit.compiler import transpile
-import numpy as np
-from csc_qu_tools.qiskit import Helmi
+from qiskit import execute
+from qiskit_iqm import IQMProvider
 
-qreg = QuantumRegister(2, "qB")
-creg = ClassicalRegister(2, "c")
+shots = 1000
+
+qreg = QuantumRegister(2, "QB")
+creg = ClassicalRegister(2, "C")
 circuit = QuantumCircuit(qreg, creg)
 
 circuit.h(qreg[0])
 circuit.cx(qreg[0], qreg[1])
-circuit.measure(range(2), range(2))
+circuit.measure_all()
 
 # Uncomment if you wish to print the circuit
 # print(circuit.draw())
 
-basis_gates = ['r', 'cz']
-circuit_decomposed = transpile(circuit, basis_gates=basis_gates)
-
-# Uncomment if you wish to print the circuit
-# print(circuit_decomposed.draw())
-
-virtual_qubits = circuit_decomposed.qubits
+# Qiskit uses 0 indexing for identifying qubits
 qubit_mapping = {
-                virtual_qubits[0]: "QB1",
-                virtual_qubits[1]: "QB3",
-            }
+    qreg[0]: 0,  # Map first qubit in Quantum Register to QB1
+    qreg[1]: 2,  # Map second qubit in Quantum Register to QB3
+}
 
-provider = Helmi()
-backend = provider.set_backend()
+HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
+if not HELMI_CORTEX_URL:
+    raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
-job = backend.run(circuit_decomposed, shots=1000, qubit_mapping=qubit_mapping)
+provider = IQMProvider(HELMI_CORTEX_URL)
+backend = provider.get_backend()
 
+job = execute(circuit, backend, shots=shots, initial_layout=qubit_mapping)
 counts = job.result().get_counts()
 print(counts)
