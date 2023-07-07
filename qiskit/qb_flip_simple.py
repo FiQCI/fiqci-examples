@@ -1,5 +1,5 @@
 import os
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit import QuantumCircuit, QuantumRegister
 from qiskit import execute
 from qiskit_iqm import IQMProvider
 from typing import List, Tuple
@@ -17,8 +17,7 @@ def single_flip_circuit(qubit: int) -> Tuple[QuantumCircuit, dict]:
         tuple: Tuple of the created QuantumCircuit and the mapping dictionary.
     """
     qreg = QuantumRegister(1, "qb")
-    creg = ClassicalRegister(1, "c")
-    qc = QuantumCircuit(qreg, creg)
+    qc = QuantumCircuit(qreg)
     qc.x(0)
     qc.measure_all()
     mapping = {qreg[0]: qubit}
@@ -37,8 +36,7 @@ def flip_circuit(qubits: List[int]) -> Tuple[QuantumCircuit, dict]:
         tuple: Tuple of the created QuantumCircuit and the mapping dictionary.
     """
     qreg = QuantumRegister(len(qubits), "qb")
-    creg = ClassicalRegister(len(qubits), "c")
-    qc = QuantumCircuit(qreg, creg)
+    qc = QuantumCircuit(qreg)
     for qubit in qubits:
         qc.x(qubit)
     qc.measure_all()
