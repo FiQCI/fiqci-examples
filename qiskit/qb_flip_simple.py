@@ -1,3 +1,6 @@
+"""
+Simple qubit flipping example
+"""
 import os
 from qiskit import QuantumCircuit, QuantumRegister
 from qiskit import execute
@@ -9,12 +12,6 @@ def single_flip_circuit(qubit: int) -> Tuple[QuantumCircuit, dict]:
     """
     Returns a 1-qubit circuit with an X gate to flip the qubit from |0> to |1>.
     Also returns the correct mapping.
-
-    Args:
-        qubit (int): Qubit index to flip.
-
-    Returns:
-        tuple: Tuple of the created QuantumCircuit and the mapping dictionary.
     """
     qreg = QuantumRegister(1, "qb")
     qc = QuantumCircuit(qreg)
@@ -28,12 +25,6 @@ def flip_circuit(qubits: List[int]) -> Tuple[QuantumCircuit, dict]:
     """
     Creates a quantum circuit with X gates applied to the qubits specified in the input list.
     Returns the circuit and a mapping of qubits.
-
-    Args:
-        qubits (List[int]): List of qubit indices to flip.
-
-    Returns:
-        tuple: Tuple of the created QuantumCircuit and the mapping dictionary.
     """
     qreg = QuantumRegister(len(qubits), "qb")
     qc = QuantumCircuit(qreg)
@@ -47,16 +38,7 @@ def flip_circuit(qubits: List[int]) -> Tuple[QuantumCircuit, dict]:
 def calculate_success_probability(counts: dict, shots: int, desired_state: str) -> float:
     """
     Calculate the success probability from the job results.
-
-    Args:
-        counts (dict): A dictionary with keys representing qubit states and values representing the number of occurrences.
-        shots (int): Total number of shots taken in the experiment.
-        desired_state (str): The state that is considered a "success".
-
-    Returns:
-        float: Success probability.
     """
-    # Count the number of times the 'desired_state' appears
     success_counts = counts.get(desired_state, 0)
     return success_counts / shots
 
