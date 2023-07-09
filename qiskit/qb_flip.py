@@ -73,16 +73,18 @@ def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
         if not HELMI_CORTEX_URL:
             raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
         provider = IQMProvider(HELMI_CORTEX_URL)
+        backend = provider.get_backend()
     else:
         provider = Aer
-
-    backend = provider.get_backend('aer_simulator')
+        backend = provider.get_backend('aer_simulator')
 
     circuit_mapping_pairs = []  # circuit, mapping tuples
     if qubits is None:  # Flip all qubits
+        print("Flipping all qubits")
         circuit, mapping = flip_circuit([0, 1, 2, 3, 4])
         circuit_mapping_pairs.append((circuit, mapping))
     else:  # Flip specified qubits
+        print("Flipping qubits: ", qubits)
         for qb in qubits:
             circuit, mapping = single_flip_circuit(qb)
             circuit_mapping_pairs.append((circuit, mapping))
@@ -105,11 +107,7 @@ def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
         else:
             success_probability = calculate_success_probability(counts, shots, '1')
 
-        if verbose:
-            print("\nCounts:", counts)
-
-        if "IQM" in str(backend):
-            print("\n" + job.result().request.qubit_mapping[0].physical_name + "\n")
+        print("\nCounts:", counts)
 
         print(f"Success probability: {success_probability * 100:.2f}%")
 
