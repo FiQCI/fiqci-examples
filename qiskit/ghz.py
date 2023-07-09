@@ -18,7 +18,8 @@ From this we can measure the trace distance between QB3 and each of the other qu
 
 A 5 qubit GHZ state is then created 
 
-In this example we calculate the fidelity and Distance from target state for each bell state adn then the 5 qubit GHZ state
+In this example we calculate the fidelity and Distance from target state for each bell state 
+and then the 5 qubit GHZ state
 
 - Fidelity is the "closeness" of two quantum states or how distinguishable they are from each other 
     - For example a maximum value of 1 is attained if and only if the two states are identical. 
