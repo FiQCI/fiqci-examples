@@ -100,7 +100,9 @@ qB_4: ────────────────╫───────�
     or Kolmogorov distance
     It is another measure of the distinguishability between two quantum states
 
+## Additional examples
 
+Additional example can be found on the [Cirq on IQM](https://iqm-finland.github.io/cirq-on-iqm/user_guide.html) Website.
 
 
 
