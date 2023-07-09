@@ -20,27 +20,18 @@ def get_args():
     parser.add_argument("--backend", choices=['helmi', 'simulator'], default='simulator',
                         help="Backend to use: 'helmi' or 'simulator'", required=True)
     parser.add_argument("--qubits", type=int, nargs='+',
-                        help="Space-separated list of qubits to flip. If not specified, will flip all qubits.")
+                        help="List of qubits to flip. If not specified, will flip all qubits.")
     parser.add_argument("--shots", type=int, default=1000,
                         help="Number of shots to run the circuit. Default is 1000.")
     parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Increase the output verbosity")
+                        help="Verbose output")
     return parser.parse_args()
 
 
 def calculate_success_probability(counts: dict, shots: int, desired_state: str) -> float:
     """
     Calculate the success probability from the job results.
-
-    Args:
-        counts (dict): A dictionary with keys representing qubit states and values representing the number of occurrences.
-        shots (int): Total number of shots taken in the experiment.
-        desired_state (str): The state that is considered a "success".
-
-    Returns:
-        float: Success probability.
     """
-    # Count the number of times the 'desired_state' appears
     success_counts = counts.get(desired_state, 0)
     return success_counts / shots
 
@@ -49,12 +40,6 @@ def flip_circuit(qubits: List[int]) -> Tuple[QuantumCircuit, dict]:
     """
     Creates a quantum circuit with X gates applied to the qubits specified in the input list.
     Returns the circuit and a mapping of qubits.
-
-    Args:
-        qubits (List[int]): List of qubit indices to flip.
-
-    Returns:
-        tuple: Tuple of the created QuantumCircuit and the mapping dictionary.
     """
     qreg = QuantumRegister(len(qubits), "qb")
     qc = QuantumCircuit(qreg)
@@ -69,12 +54,6 @@ def single_flip_circuit(qubit: int) -> Tuple[QuantumCircuit, dict]:
     """
     Returns a 1-qubit circuit with an X gate to flip the qubit from |0> to |1>.
     Also returns the correct mapping.
-
-    Args:
-        qubit (int): Qubit index to flip.
-
-    Returns:
-        tuple: Tuple of the created QuantumCircuit and the mapping dictionary.
     """
     qreg = QuantumRegister(1, "qb")
     qc = QuantumCircuit(qreg)
