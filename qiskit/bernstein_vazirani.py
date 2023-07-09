@@ -1,6 +1,6 @@
 import os
 import argparse
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, Aer
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, Aer, transpile
 from qiskit_iqm import IQMProvider
 from random import randint
 from collections import Counter
@@ -38,12 +38,13 @@ class BVoracle:
     Class to define the Bernstein-Vazirani Oracle.
     """
 
-    def __init__(self, backend, dim=4, num=None):
+    def __init__(self, backend, dim=4, num=None, verbose=False):
         self._num = num if num else randint(0, 2**dim - 1)
         self.dim = dim
         self.backend = backend
         self.ccalls = 0
         self.qcalls = 0
+        self.verbose = verbose
 
     def get(self, x):
         assert len(x) == self.dim
@@ -84,6 +85,12 @@ class BVoracle:
             qc.h(i)
 
         qc.measure(range(4), range(4))
+        if self.verbose:
+            print("Created circuit: ")
+            print(qc.draw())
+            transpiled_circuit = transpile(qc, self.backend)
+            print("Transpiled circuit: ")
+            print(transpiled_circuit.draw())
 
         return qc
 
@@ -240,7 +247,7 @@ def main():
             + f"The hidden oracle number is s = {NUM}. In general it is not dislosed to the testing party."
         )
 
-    bv = BVoracle(num=NUM, backend=backend)
+    bv = BVoracle(num=NUM, backend=backend, verbose=args.verbose)
     print(offset + "The oracle is now initialized with given secret oracle index.")
 
     if args.option == 1:

@@ -67,7 +67,6 @@ def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
     """
     Function to run the flip circuit
     """
-    provider = None
     if backend == 'helmi':
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
