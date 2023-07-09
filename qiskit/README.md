@@ -50,7 +50,7 @@ As a batch script:
 module use /appl/local/quantum/modulefiles
 module load helmi_qiskit
 
-python -u qb_flip_qiskit.py --backend helmi
+python -u qb_flip.py --backend helmi
 ```
 
 The output will then be redirected to filenames in your submission directory called `helmijob.o` and `helmijob.e`. 
