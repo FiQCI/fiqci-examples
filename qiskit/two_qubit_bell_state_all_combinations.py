@@ -50,7 +50,7 @@ else:
 for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
 
     start_time = time.time()
-    qubit_mapping = {
+    qubit_mapping = {  # The qubit mapping can be added optionally
         qreg[0]: qubit_a,
         qreg[1]: qubit_b,
     }
