@@ -6,7 +6,7 @@ Examples made through Qiskit which are optimised for use on Helmi. These example
 
 | Example                                              | Code                    | Quick run                                      |
 |------------------------------------------------------|-------------------------|------------------------------------------------|
-| [Qubit Flipping]( #qubit-flipping)                   | `qb_flip_qiskit.py`     | `python qb_flip_qiskit.py --backend helmi`     |
+| [Qubit Flipping]( #qubit-flipping)                   | `qb_flip.py`     | `python qb_flip.py --backend helmi`     |
 | [Bell State Entanglement]( #bell-state-entanglement) | `bell_states_qiskit.py` | `python bell_states_qiskit.py --backend helmi` |
 | [Bernstein Vazirani]( #bernstein-vazirani)           | `bv.py`                 | `python bernstein_vazirani.py --backend helmi` |
 | [GHZ state]( #ghz-state)                             | `ghz.py`                | `python ghz.py --backend helmi`                |
@@ -26,7 +26,7 @@ Then jobs can be run through the batch queueing system, SLURM. For accessing Hel
 For interactive usage:
 
 ```bash
-srun --account project_xxx -t 00:15:00 -c 1 -n 1 --partition q_fiqci python -u qb_flip_qiskit.py --backend helmi
+srun --account project_xxx -t 00:15:00 -c 1 -n 1 --partition q_fiqci python -u qb_flip.py --backend helmi
 ```
 
 This will print the output to the terminal. The `-u` option enables constant updating of the output through python. 
@@ -58,9 +58,9 @@ The output will then be redirected to filenames in your submission directory cal
 
 ### Qubit Flipping
 
-The Qubit flipping example, `qb_flip_qiskit.py`, demonstrates simple qubit flipping. The example first flips the qubit state of each qubit (QB1, QB2,...) individually and reports the success rate which is how many out of the 10,000 counts are expected to be in the right state. The program then flips all the qubits at once in a 5 qubit circuit and reports the total success rate. 
+The Qubit flipping example, `qb_flip.py`, demonstrates simple qubit flipping. The example first flips the qubit state of each qubit (QB1, QB2,...) individually and reports the success rate which is how many out of the 10,000 counts are expected to be in the right state. The program then flips all the qubits at once in a 5 qubit circuit and reports the total success rate. 
 
-
+The `qb_flip_simple.py` is a simple version of the `qb_flip.py` code which runs with the default options. 
 
 ### Bell State Entanglement
 
