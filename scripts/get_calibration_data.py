@@ -12,18 +12,14 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
     Optionally you can input a calibration set id (UUID) to query historical results
     Optionally save the response to a json file, if filename is provided
     """
-    def _default_headers():  # In iqm_client==13.0 this funciton is natively added.
-        headers = {'User-Agent': client._signature}
-        bearer_token = client._get_bearer_token()
-        if bearer_token:
-            headers['Authorization'] = bearer_token
-        return headers
+    headers = {'User-Agent': client._signature}
+    bearer_token = client._get_bearer_token()
+    headers['Authorization'] = bearer_token
 
     url = os.path.join(client._base_url, 'calibration')
     if calibration_set_id:
         url = os.path.join(url, calibration_set_id)
 
-    headers = _default_headers()
     response = requests.get(url, headers=headers)
     response.raise_for_status()  # will raise an HTTPError if the response was not ok
 
