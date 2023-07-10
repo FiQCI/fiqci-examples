@@ -46,7 +46,7 @@ def single_flip_circuit(qubit: int):
     qubit = cirq.NamedQubit(f'QB{qubit}')
     circuit = cirq.Circuit()
     circuit.append(cirq.X(qubit))
-    circuit.append(cirq.measure(qubit, key='m'))
+    circuit.append(cirq.measure(qubit, key='M'))
     return circuit
 
 
@@ -58,7 +58,7 @@ def flip_circuit(qubits: List[int]):
     circuit = cirq.Circuit()
     for qubit in qubits:
         circuit.append(cirq.X(qubit))
-    circuit.append(cirq.measure(*qubits, key='m'))
+    circuit.append(cirq.measure(*qubits, key='M'))
     return circuit
 
 
@@ -92,7 +92,7 @@ def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
 
         result = sampler.run(circuit, repetitions=shots)
 
-        counts = result.histogram(key='m', fold_func=fold_func)
+        counts = result.histogram(key='M', fold_func=fold_func)
 
         if qubits is None:
             success_probability = calculate_success_probability(counts, shots, '11111')
