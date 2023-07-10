@@ -16,12 +16,6 @@ circuit.measure_all()
 # Uncomment if you wish to print the circuit
 # print(circuit.draw())
 
-# Qiskit uses 0 indexing for identifying qubits
-qubit_mapping = {
-    qreg[0]: 0,  # Map first qubit in Quantum Register to QB1
-    qreg[1]: 2,  # Map second qubit in Quantum Register to QB3
-}
-
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 if not HELMI_CORTEX_URL:
     raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
@@ -34,7 +28,7 @@ backend = provider.get_backend()
 # print(f'Number of qubits: {backend.num_qubits}')
 # print(f'Coupling map: {backend.coupling_map}')
 
-job = execute(circuit, backend, shots=shots, initial_layout=qubit_mapping)
+job = execute(circuit, backend, shots=shots)
 result = job.result()
 exp_result = job.result()._get_experiment(circuit)
 # You can retrieve the job at a later date with backend.retrieve_job(job_id)
@@ -42,7 +36,7 @@ exp_result = job.result()._get_experiment(circuit)
 print("Job ID: ", job.job_id())
 # print(result.request.circuits)
 print("Calibration Set ID: ", exp_result.calibration_set_id)
-# print(result.request.qubit_mapping)
+print(result.request.qubit_mapping)
 # print(result.request.shots)
 
 counts = result.get_counts()
