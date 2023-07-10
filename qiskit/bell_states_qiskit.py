@@ -1,13 +1,9 @@
-import sys
+import os
 import argparse
 from argparse import RawTextHelpFormatter
+from qiskit import QuantumCircuit, QuantumRegister, Aer, execute
 
-import qiskit
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from qiskit.compiler import transpile
-import numpy as np
-
-from csc_qu_tools.qiskit import Helmi as helmi
+from qiskit_iqm import IQMProvider
 
 """
 Create and measure a bell state. User lists the pairs to entangle.
@@ -27,7 +23,6 @@ def get_args():
         formatter_class=RawTextHelpFormatter,
         epilog="""Example usage:
         python bell_states_qiskit.py --backend simulator
-        python bell_states_qiskit.py --backend simulator --noise
         python bell_states_qiskit.py --backend simulator --verbose (prints circuits)
         """,
     )
@@ -39,12 +34,12 @@ def get_args():
         help="""
         Define the backend for running the program.
         'aer'/'simulator' runs on Qiskit's aer simulator, 
-        'helmi' runs on VTT Helmi Quantum Computer
+        'helmi' runs on the Helmi Quantum Computer
         """,
         required=False,
         type=str,
         default=None,
-        choices=["helmi", "aer", "simulator"],
+        choices=["helmi", "simulator"],
     )
 
     args_parser.add_argument(
@@ -57,24 +52,6 @@ def get_args():
         action="store_true",
     )
 
-    args_parser.add_argument(
-        "--noise",
-        "-n",
-        help="""
-        Add noise to the simulation.
-        Only use with simulator backend.
-        """,
-        required=False,
-        action="store_true",
-    )
-
-    if (args_parser.parse_args().backend == None) or (
-        args_parser.parse_args().noise == True
-        and args_parser.parse_args().backend == "helmi"
-    ):
-        args_parser.print_help()
-        exit()
-
     return args_parser.parse_args()
 
 
@@ -84,36 +61,20 @@ def main():
 
     print("Running on backend = ", args.backend)
 
-    if args.backend == "simulator" or args.backend == "aer":
-        from qiskit.providers.aer import AerSimulator
-
-        if args.noise == True:
-            from csc_qu_tools.qiskit.mock import FakeHelmi
-
-            print(
-                "Inducing artificial noise into Simulator with FakeHelmi Noise Model"
-            )
-            basis_gates = ["r", "cz"]
-            backend = FakeHelmi()
-        else:
-            basis_gates = ["r", "cz"]
-            backend = AerSimulator()
-
-    elif args.backend == "helmi":
-        provider = helmi()
-        backend = provider.set_backend()
-        basis_gates = provider.basis_gates
-
+    if args.backend == 'helmi':
+        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
+        if not HELMI_CORTEX_URL:
+            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        provider = IQMProvider(HELMI_CORTEX_URL)
+        backend = provider.get_backend()
     else:
-        sys.exit("Backend option not recognised")
-
-    backend_dict = dict([("backend", backend), ("basis_gates", basis_gates)])
+        provider = Aer
+        backend = provider.get_backend('aer_simulator')
 
     print(" ")
     print("   Preparing a Bell State")
     print("   |00> + |11> / sqrt(2)")
     print(" ")
-    id_dist = [0.5, 0, 0, 0.5]
 
     offset = " " * 10
     offset2 = " " * 20
@@ -122,43 +83,29 @@ def main():
 
         print(offset + "Control: QB" + str(qb + 1) + "  Target: QB3 -> ")
         qreg = QuantumRegister(2, "qB")
-        creg = ClassicalRegister(2, "c")
-        qc = QuantumCircuit(qreg, creg)
+        qc = QuantumCircuit(qreg)
 
         qc.h(qreg[0])
         qc.cx(qreg[0], qreg[1])
-        qc.measure(range(2), range(2))
+        qc.measure_all()
 
-        if args.verbose == True:
+        if args.verbose:
             print(qc.draw())
-
-        qc_decomposed = transpile(qc, basis_gates=basis_gates)
 
         shots = 10000
 
-        # Map virtual and physical qubits (routing)
-        if "IQMBackend" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB" + str(qb + 1),
-                virtual_qubits[1]: "QB3",
-            }
+        qubit_mapping = {
+            qreg[0]: qb,
+            qreg[1]: 2,
+        }
 
-        elif "fake_helmi" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB" + str(qb + 1),
-                virtual_qubits[1]: "QB3",
-            }
-
-        else:
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = None
-
-        # #Run job on the QC
-        job = backend.run(qc_decomposed, shots=shots, qubit_mapping=qubit_mapping)
+        job = execute(qc, backend, shots=shots, initial_layout=qubit_mapping)
 
         counts = job.result().get_counts()
+
+        if args.verbose and "IQM" in str(backend):
+            print("Mapping")
+            print(job.result().request.qubit_mapping)
 
         t2 = ((counts["00"] + counts["11"]) / shots) * 100
 
@@ -182,41 +129,29 @@ def main():
 
         print(offset + "Control: QB3" + "  Target QB" + str(qb + 1) + " -> ")
         qreg = QuantumRegister(2, "qB")
-        creg = ClassicalRegister(2, "c")
-        qc = QuantumCircuit(qreg, creg)
+        qc = QuantumCircuit(qreg)
 
         qc.h(qreg[1])
         qc.cx(qreg[1], qreg[0])
-        qc.measure(range(2), range(2))
+        qc.measure_all()
 
-        if args.verbose == True:
+        if args.verbose:
             print(qc.draw())
-
-        qc_decomposed = transpile(qc, basis_gates=basis_gates)
 
         shots = 1000
 
-        # Map virtual and physical qubits (routing)
-        if "IQMBackend" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB" + str(qb + 1),
-                virtual_qubits[1]: "QB3",
-            }
-        elif "fake_helmi" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB" + str(qb + 1),
-                virtual_qubits[1]: "QB3",
-            }
-        else:
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = None
+        qubit_mapping = {
+            qreg[0]: qb,
+            qreg[1]: 2,
+        }
 
-        # Run job on the QC
-        job = backend.run(qc_decomposed, shots=shots, qubit_mapping=qubit_mapping)
+        job = execute(qc, backend, shots=shots, initial_layout=qubit_mapping)
 
         counts = job.result().get_counts()
+
+        if args.verbose and "IQM" in str(backend):
+            print("Mapping")
+            print(job.result().request.qubit_mapping)
 
         t2 = ((counts["00"] + counts["11"]) / shots) * 100
 

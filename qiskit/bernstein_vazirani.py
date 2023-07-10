@@ -1,21 +1,16 @@
-import sys
+import os
 import argparse
-from argparse import RawTextHelpFormatter
-
-import qiskit
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from qiskit import AncillaRegister
-from qiskit.compiler import transpile
-import numpy as np
-
+from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, Aer, transpile
+from qiskit_iqm import IQMProvider
 from random import randint
-
-from csc_qu_tools.qiskit import Helmi as helmi
+from collections import Counter
+from argparse import RawTextHelpFormatter
 
 """
 
 This example shows the Bernstein-Vazirani Algorithm. 
-Bernstein-Vazirani Algorithm is an extension of the Deutsch-Joza algorithm. The algorithm tries to search for a bit string from a hidden function. 
+Bernstein-Vazirani Algorithm is an extension of the Deutsch-Joza algorithm. The algorithm tries to search 
+for a bit string from a hidden function. 
 
 The Solution:
 
@@ -25,7 +20,8 @@ The Solution:
 - Apply Hadamard gates to the input qubits
 - Measure
 
-This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence only needing a classical register of size 4 despite having a quantum register of size 5. 
+This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence only needing a classical register 
+of size 4 despite having a quantum register of size 5. 
 
 This example also makes use of the Helmi.routing tool to map the "output" qubit onto QB3 for Helmi's topology. 
 
@@ -37,18 +33,96 @@ offset_2 = " " * 10
 offset_3 = " " * 50
 
 
-def get_args():
+class BVoracle:
+    """
+    Class to define the Bernstein-Vazirani Oracle.
+    """
 
+    def __init__(self, backend, dim=4, num=None, verbose=False):
+        self._num = num if num else randint(0, 2**dim - 1)
+        self.dim = dim
+        self.backend = backend
+        self.ccalls = 0
+        self.qcalls = 0
+        self.verbose = verbose
+
+    def get(self, x):
+        assert len(x) == self.dim
+        # ccalls increases every time one queries the oracle
+        self.ccalls += 1
+        s = self._to_bin_digits(self._num)
+        return sum(x[i] * s[i] for i in range(self.dim)) % 2
+
+    # Assuming that when one calls the qoracle to be created
+    # dim is correctly stated
+    def quantum(self, shots=1):
+        # qcalls increases every time one queries the oracle
+        self.qcalls += 1
+        qreg = QuantumRegister(5, "QB")
+        creg = ClassicalRegister(4, "c")
+        qc = QuantumCircuit(qreg, creg)
+
+        qc = self._prepare_circuit(qc, qreg)
+
+        job = execute(qc, self.backend, shots=shots)
+
+        return job.result().get_counts()
+
+    def _prepare_circuit(self, qc, qreg):
+        # Prepare the additional qubit
+        qc.h(qreg[4])
+        qc.z(qreg[4])
+        for i in range(4):
+            qc.h(i)
+
+        s = self._to_bin_digits(self._num)[::-1]
+
+        for q in range(4):
+            if s[q] != 0:
+                qc.cx(q, qreg[4])
+
+        for i in range(4):
+            qc.h(i)
+
+        qc.measure(range(4), range(4))
+        if self.verbose:
+            print("Created circuit: ")
+            print(qc.draw())
+            transpiled_circuit = transpile(qc, self.backend)
+            print("Transpiled circuit: ")
+            print(transpiled_circuit.draw())
+
+        return qc
+
+    def _to_bin_digits(self, num, dim=4):
+        """
+        Returns binary representation of num (int) as a list of ints with optional
+        parameter dim to fill with zeroes from left up to length dim.
+        """
+        return [int(c) for c in self._to_bin_str(num, dim)]
+
+    def _to_bin_str(self, num, dim=4):
+        """
+        Returns binary representation of num (int) as a string with optional
+        parameter dim to fill with zeroes from left up to length dim.
+        """
+        return f"{num:0{dim}b}"
+
+
+def get_args():
+    """
+    Parse arguments.
+    """
     args_parser = argparse.ArgumentParser(
         description="""
-        This example creates a 5 qubit GHZ stats in cirq
+        This example creates a 5 qubit GHZ stats in qiskit
         First a Bell state is prepared between QB3 and all the other qubits.
         From this we can measure the trace distance between QB3 and each of the other qubits.""",
         formatter_class=RawTextHelpFormatter,
         epilog="""Example usage:
-	python bernstein_vazirani.py --backend helmi
+        python bernstein_vazirani.py --backend helmi
         python bernstein_vazirani.py --backend simulator
-        python bernstein_vazirani.py --backend simulator --noise
+        python bernstein_vazirani.py --backend simulator
         python bernstein_vazirani.py --backend helmi -v (prints circuits)
         """,
     )
@@ -64,7 +138,7 @@ def get_args():
         required=False,
         type=str,
         default=None,
-        choices=["helmi", "aer", "simulator"],
+        choices=["helmi", "simulator"],
     )
 
     args_parser.add_argument(
@@ -72,17 +146,6 @@ def get_args():
         "-v",
         help="""
         Increase the output verbosity
-        """,
-        required=False,
-        action="store_true",
-    )
-
-    args_parser.add_argument(
-        "--noise",
-        "-n",
-        help="""
-        Add noise to the simulation.
-        Only use with simulator backend.
         """,
         required=False,
         action="store_true",
@@ -124,210 +187,59 @@ def get_args():
         default=5,
     )
 
-    if (args_parser.parse_args().backend == None) or (
-        args_parser.parse_args().noise == True
-        and args_parser.parse_args().backend == "helmi"
-    ):
-        args_parser.print_help()
-        exit()
-
     return args_parser.parse_args()
 
 
-def bin_str(num, dim=4):
-    """
-    Returns binary representation of num (int) as a string with optional
-    parameter dim to fill with zeroes from left up to length dim.
-    """
-    return f"{num:0{dim}b}"
-
-
-def bin_digits(num, dim=4):
-    """
-    Returns binary representation of num (int) as a list of ints with optional
-    parameter dim to fill with zeroes from left up to length dim.
-    """
-    return [int(c) for c in bin_str(num, dim)]
-
-
-class BVoracle:
-    def __init__(self, dim=4, num=None, backend_dict=None):
-        if num == None:
-            num = randint(0, 2**dim - 1)
-        self._num = num
-        self.dim = dim
-        self.backend_dict = backend_dict
-        self.ccalls = 0
-        self.qcalls = 0
-        if backend_dict == None:
-            print("Call BVOracle with backend_dict")
-            exit(0)
-
-    def get(self, x):
-        assert len(x) == self.dim
-        ## ccalls increases every time one queries the oracle
-        self.ccalls += 1
-        res = 0
-        s = bin_digits(self._num, self.dim)
-        for i in range(self.dim):
-            res += x[i] * s[i]
-        return res % 2
-
-    ## Assuming that when one calls the qoracle to be created
-    ## dim is correctly stated
-    def quantum(self, shots=1, qubit_mapping=None):
-        backend = self.backend_dict["backend"]
-        basis_gates = self.backend_dict["basis_gates"]
-
-        ## qcalls increases every time one queries the oracle
-        self.qcalls += 1
-        qreg = QuantumRegister(5, "qB")
-        creg = ClassicalRegister(4, "c")
-        OUTER_QUBITS = [0, 1, 3, 4]
-        qc = QuantumCircuit(qreg, creg)
-
-        ## Prepare the additional qubit
-        qc.h(qreg[4])
-        qc.z(qreg[4])
-
-        for i in range(4):
-            qc.h(i)
-
-        s = bin_digits(self._num)
-        s = s[::-1]
-
-        for q in range(4):
-            if s[q] == 0:
-                continue
-            else:
-                qc.cx(q, qreg[4])
-
-        for i in range(4):
-            qc.h(i)
-
-        qc.measure(range(4), range(4))
-
-        qc = helmi.routing(qc)
-
-        if verbose == True:
-            print_header("Routed circuit")
-            print(qc.draw())
-
-        qc_decomposed = transpile(qc, basis_gates=basis_gates)
-        if verbose == True:
-            print_header("Decomposed circuit")
-            print(qc_decomposed.draw())
-
-        # Map virtual and physical qubits (routing)
-        if "IQMBackend" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB1",
-                virtual_qubits[1]: "QB2",
-                virtual_qubits[2]: "QB3",
-                virtual_qubits[3]: "QB4",
-                virtual_qubits[4]: "QB5",
-            }
-
-        elif "fake_helmi" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB1",
-                virtual_qubits[1]: "QB2",
-                virtual_qubits[2]: "QB3",
-                virtual_qubits[3]: "QB4",
-                virtual_qubits[4]: "QB5",
-            }
-
-        else:
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = None
-
-        job = backend.run(qc_decomposed, shots=shots, qubit_mapping=qubit_mapping)
-
-        return job.result().get_counts()
-
-    def creset(self):
-        """
-        resets the count of ccalls
-        """
-        self.ccalls = 0
-
-    def qreset(self):
-        """
-        resets the count of qcalls
-        """
-        self.qcalls = 0
-
-
-def classical(bv):
-    """Execution of classical algorithm"""
-    b = ""
-    for num in range(bv.dim):
-        x = bin_digits(2**num, bv.dim)
-        b += str(bv.get(x))
-    return b[::-1]
+# def classical(bv):
+#     """Execution of classical algorithm"""
+#     b = ""
+#     for num in range(bv.dim):
+#         x = bin_digits(2**num, bv.dim)
+#         b += str(bv.get(x))
+#     return b[::-1]
 
 
 def print_header(s):
-    l = 41
-    print(" ")
-    print(offset + "".join("=" for _ in range(l + 8)))
-    print(offset_3 + f"=== {s.upper()} ===")
-    print(offset + "".join("=" for _ in range(l + 8)))
-    print(" ")
+    """
+    Prints a section header.
+    """
+    print("\n" + " " * 50 + f"=== {s.upper()} ===")
 
 
 def most_frequent(lst):
-    most_freq_item = max(lst, key=lst.get)
-    # print("Maximum value:",most_freq_item)
-
-    return most_freq_item, lst[most_freq_item]
+    """
+    Returns the most frequent item in a list.
+    """
+    freqs = Counter(lst)
+    most_freq_item = max(freqs, key=freqs.get)
+    return most_freq_item, freqs[most_freq_item]
 
 
 def main():
     args = get_args()
 
-    NUM = args.number
-    if NUM is not None and NUM > 15:
-        sys.exit("ERROR! Guess must be a 4 bit string number or lower. Less than or equal to 15.")
-    global verbose
+    if args.backend == 'helmi':
+        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
+        if not HELMI_CORTEX_URL:
+            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        provider = IQMProvider(HELMI_CORTEX_URL)
+        backend = provider.get_backend()
+    else:
+        provider = Aer
+        backend = provider.get_backend('aer_simulator')
 
-    verbose = args.verbose
+    if args.number is not None and args.number > 15:
+        raise ValueError("ERROR! Guess must be a 4 bit string number or lower. Less than or equal to 15.")
 
     print("Running on backend = ", args.backend)
 
-    if args.backend == "simulator" or args.backend == "aer":
-        from qiskit.providers.aer import AerSimulator
-
-        if args.noise == True:
-            from csc_qu_tools.qiskit.mock import FakeHelmi
-
-            print(
-                "Inducing artificial noise into Simulator with FakeHelmi Noise Model"
-            )
-            basis_gates = ["r", "cz"]
-            backend = FakeHelmi()
-        else:
-            basis_gates = ["r", "cz"]
-            backend = AerSimulator()
-
-    elif args.backend == "helmi":
-        provider = helmi()
-        backend = provider.set_backend()
-        basis_gates = provider.basis_gates
-
-    else:
-        sys.exit("Backend option not recognised")
-
-    backend_dict = dict([("backend", backend), ("basis_gates", basis_gates)])
-
     print_header("initialization")
+    NUM = args.number
     if NUM is None:
         NUM = randint(0, 15)
         print(
             offset
-            + f"The hidden oracle number was chosen randomly and will not be disclosed."
+            + "The hidden oracle number was chosen randomly and will not be disclosed."
         )
     else:
         print(
@@ -335,21 +247,19 @@ def main():
             + f"The hidden oracle number is s = {NUM}. In general it is not dislosed to the testing party."
         )
 
-    bv = BVoracle(num=NUM, backend_dict=backend_dict)
+    bv = BVoracle(num=NUM, backend=backend, verbose=args.verbose)
     print(offset + "The oracle is now initialized with given secret oracle index.")
 
     if args.option == 1:
-
         guess = bv.quantum(shots=10000)
-
         s, amt = most_frequent(guess)
         success_rate = round((amt / 1000) * 100, 2)
         print(s, amt)
 
         print_header("Single run")
-        print(offset + "Success Chance:  " + str(success_rate) + "%")
-        print(offset + "Result:  " + str(int(s, 2)))
-        print(offset + "Binary:  " + str(s))
+        print(offset + f"Success Chance: {success_rate}%")
+        print(offset + f"Result: {int(s, 2)}")
+        print(offset + f"Binary: {s}")
 
         print(
             offset

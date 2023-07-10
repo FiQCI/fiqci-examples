@@ -1,13 +1,13 @@
-import sys
+import os
 import argparse
 from argparse import RawTextHelpFormatter
 
-import qiskit
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from qiskit.compiler import transpile
+from qiskit import QuantumCircuit, QuantumRegister
+from qiskit import Aer
+from qiskit import execute
 import numpy as np
 
-from csc_qu_tools.qiskit import Helmi as helmi
+from qiskit_iqm import IQMProvider
 
 """
 
@@ -18,7 +18,8 @@ From this we can measure the trace distance between QB3 and each of the other qu
 
 A 5 qubit GHZ state is then created 
 
-In this example we calculate the fidelity and Distance from target state for each bell state adn then the 5 qubit GHZ state
+In this example we calculate the fidelity and Distance from target state for each bell state 
+and then the 5 qubit GHZ state
 
 - Fidelity is the "closeness" of two quantum states or how distinguishable they are from each other 
     - For example a maximum value of 1 is attained if and only if the two states are identical. 
@@ -40,7 +41,6 @@ def get_args():
         formatter_class=RawTextHelpFormatter,
         epilog="""Example usage:
         python ghz.py --backend simulator
-        python ghz.py --backend simulator --noise
         python ghz.py --backend simulator --verbose (prints circuits)
         """,
     )
@@ -55,8 +55,8 @@ def get_args():
         """,
         required=False,
         type=str,
-        default=None,
-        choices=["helmi", "aer", "simulator"],
+        default="helmi",
+        choices=["helmi", "simulator"],
     )
 
     args_parser.add_argument(
@@ -69,24 +69,6 @@ def get_args():
         action="store_true",
     )
 
-    args_parser.add_argument(
-        "--noise",
-        "-n",
-        help="""
-        Add noise to the simulation.
-        Only use with simulator backend.
-        """,
-        required=False,
-        action="store_true",
-    )
-
-    if (args_parser.parse_args().backend == None) or (
-        args_parser.parse_args().noise == True
-        and args_parser.parse_args().backend == "helmi"
-    ):
-        args_parser.print_help()
-        exit()
-
     return args_parser.parse_args()
 
 
@@ -97,32 +79,15 @@ def main():
 
     args = get_args()
 
-    print("Running on backend = ", args.backend)
-
-    if args.backend == "simulator" or args.backend == "aer":
-        from qiskit.providers.aer import AerSimulator
-
-        if args.noise == True:
-            from csc_qu_tools.qiskit.mock import FakeHelmi
-
-            print(
-                "Inducing artificial noise into Simulator with FakeHelmi Noise Model"
-            )
-            basis_gates = ["r", "cz"]
-            backend = FakeHelmi()
-        else:
-            basis_gates = ["r", "cz"]
-            backend = AerSimulator()
-
-    elif args.backend == "helmi":
-        provider = helmi()
-        backend = provider.set_backend()
-        basis_gates = provider.basis_gates
-
+    if args.backend == 'helmi':
+        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
+        if not HELMI_CORTEX_URL:
+            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        provider = IQMProvider(HELMI_CORTEX_URL)
     else:
-        sys.exit("Backend option not recognised")
+        provider = Aer
 
-    backend_dict = dict([("backend", backend), ("basis_gates", basis_gates)])
+    backend = provider.get_backend('aer_simulator')
 
     shots = 10000
 
@@ -136,44 +101,31 @@ def main():
     print(" ")
     count = 0
     for qb in [0, 1, 3, 4]:
-        print(offset_2 + "QB" + str(qb + 1) + " and QB3 -> ", end=" ")
+        print(offset + "QB" + str(qb + 1) + " and QB3 -> ", end=" ")
         qreg = QuantumRegister(2, "qB")
-        creg = ClassicalRegister(2, "c")
-        qc = QuantumCircuit(qreg, creg)
+        circuit = QuantumCircuit(qreg)
 
-        qc.h(qreg[0])
-        qc.cx(qreg[0], qreg[1])
+        circuit.h(qreg[0])
+        circuit.cx(qreg[0], qreg[1])
 
-        qc.measure(range(2), range(2))
+        circuit.measure_all()
 
-        if args.verbose == True:
+        if args.verbose:
             print(" ")
-            print(qc.draw())
+            print(circuit.draw())
 
-        qc_decomposed = transpile(qc, basis_gates=basis_gates)
+        mapping = {
+            qreg[0]: qb,  # map first virtual qubit to qubit in list
+            qreg[1]: 2}   # map second virtual qubit to QB3
 
-        # Map virtual and physical qubits (routing)
-        if "IQMBackend" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB" + str(qb + 1),
-                virtual_qubits[1]: "QB3",
-            }
-
-        elif "fake_helmi" in str(backend):
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = {
-                virtual_qubits[0]: "QB" + str(qb + 1),
-                virtual_qubits[1]: "QB3",
-            }
-
-        else:
-            virtual_qubits = qc_decomposed.qubits
-            qubit_mapping = None
-
-        # Run job on the QC
-        job = backend.run(qc_decomposed, shots=shots, qubit_mapping=qubit_mapping)
+        # Run job on the circuit
+        job = execute(circuit, backend, shots=shots, initial_layout=mapping)
         counts = job.result().get_counts()
+
+        if args.verbose:
+            print(counts)
+            if "IQM" in str(backend):
+                print(job.result().request.qubit_mapping)
 
         values = counts.values()
         values_list = list(values)
@@ -189,7 +141,7 @@ def main():
 
         print("Fidelity = ", round(fid1, 3))
         print(offset_2 + offset_3, end=" ")
-        print("Distance from target ([0,1]) = ", round(bell_vd[count], 3))
+        print(offset_3 + "Distance from target ([0,1]) = ", round(bell_vd[count], 3))
 
         count += 1
 
@@ -204,48 +156,25 @@ def main():
     id_dist[31] = 0.5
 
     qreg = QuantumRegister(5, "qB")
-    creg = ClassicalRegister(5, "c")
-    qc = QuantumCircuit(qreg, creg)
+    circuit = QuantumCircuit(qreg)
 
-    qc.h(qreg[2])
+    circuit.h(qreg[2])
     for qb in [0, 1, 3, 4]:
-        qc.cx(qreg[2], qreg[qb])
+        circuit.cx(qreg[2], qreg[qb])
 
-    qc.measure(range(5), range(5))
+    circuit.measure_all()
 
-    qc_decomposed = transpile(qc, basis_gates=basis_gates)
-
-    # Map virtual and physical qubits (routing)
-    if "IQMBackend" in str(backend):
-        virtual_qubits = qc_decomposed.qubits
-        qubit_mapping = {
-            virtual_qubits[0]: "QB1",
-            virtual_qubits[1]: "QB2",
-            virtual_qubits[2]: "QB3",
-            virtual_qubits[3]: "QB4",
-            virtual_qubits[4]: "QB5",
-        }
-
-    elif "fake_helmi" in str(backend):
-        virtual_qubits = qc_decomposed.qubits
-        qubit_mapping = {
-            virtual_qubits[0]: "QB1",
-            virtual_qubits[1]: "QB2",
-            virtual_qubits[2]: "QB3",
-            virtual_qubits[3]: "QB4",
-            virtual_qubits[4]: "QB5",
-        }
-
-    else:
-        virtual_qubits = qc_decomposed.qubits
-        qubit_mapping = None
-
-    if args.verbose == True:
+    if args.verbose:
         print(" ")
-        print(qc.draw())
+        print(circuit.draw())
 
-    job = backend.run(qc_decomposed, shots=shots, qubit_mapping=qubit_mapping)
+    job = execute(circuit, backend, shots=shots)
     counts = job.result().get_counts()
+
+    if args.verbose:
+        print(counts)
+        if "IQM" in str(backend):
+            print(offset + "\n" + job.result().request.qubit_mapping[0].physical_name + "\n")
 
     values = counts.values()
     values_list = list(values)
@@ -257,8 +186,8 @@ def main():
         vd = 0.5 * vd
         fid2 += np.sqrt((values_list[i] / shots) * id_dist[i])
 
-    print(offset_2 + "GHZ-5 -> Fidelity = ", round(fid2, 3))
-    print(offset_2 + "GHZ-5 -> Distance from target ([0,1]) = ", round(vd, 3))
+    print(offset + "GHZ-5 -> Fidelity = ", round(fid2, 3))
+    print(offset + "GHZ-5 -> Distance from target ([0,1]) = ", round(vd, 3))
 
     print(" ")
     print(" ")

@@ -1,10 +1,10 @@
-import sys
+import os
 import argparse
 from argparse import RawTextHelpFormatter
 
-from csc_qu_tools.cirq import Helmi
-from csc_qu_tools.cirq import add_simulator_noise
 import cirq
+from cirq_iqm.iqm_sampler import IQMSampler
+from cirq_iqm import Adonis
 import numpy as np
 
 """
@@ -18,6 +18,8 @@ A 5 qubit GHZ state is then created
 
 
 """
+
+adonis = Adonis()
 
 
 def get_args():
@@ -50,25 +52,12 @@ def get_args():
         action="store_true",
     )
 
-    args_parser.add_argument(
-        "--noise",
-        "-n",
-        help="""
-        Add noise to the simulation.
-        Only use with simulator backend.
-        """,
-        required=False,
-        action="store_true",
-    )
-
-    if (args_parser.parse_args().backend == None) or (
-        args_parser.parse_args().noise == True
-        and args_parser.parse_args().backend == "helmi"
-    ):
-        args_parser.print_help()
-        exit()
-
     return args_parser.parse_args()
+
+
+def fold_func(x: np.ndarray) -> str:
+    """Fold the measured bit arrays into strings."""
+    return ''.join(map(lambda x: chr(x + ord('0')), x))
 
 
 def main():
@@ -78,23 +67,13 @@ def main():
 
     args = get_args()
 
-    print("Running on backend = ", args.backend)
-
-    if args.backend == "simulator":
-        device = Helmi()
-        backend = cirq.Simulator()
-
-    elif args.backend == "helmi":
-        device = Helmi()
-        backend = Helmi("settings.json").set_helmi()
-
+    if args.backend == 'helmi':
+        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
+        if not HELMI_CORTEX_URL:
+            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        sampler = IQMSampler(HELMI_CORTEX_URL)
     else:
-        sys.exit("Backend option not recognised")
-
-    if args.noise == True:
-        print("Inducing artificial noise into Simulator with a DepolarizingChannel")
-        print("On each Hadamard gate in the circuit")
-        print("See https://quantumai.google/reference/python/cirq/depolarize")
+        sampler = cirq.Simulator()
 
     shots = 10000
 
@@ -110,29 +89,34 @@ def main():
     for qb in [0, 1, 3, 4]:
         print(offset_2 + "QB" + str(qb + 1) + " and QB3 -> ", end=" ")
         q = [cirq.NamedQubit(f"QB{j + 1}") for j in [qb, 2]]
-        c = cirq.Circuit()
+        circuit = cirq.Circuit()
 
-        c.append(cirq.H(q[0]))
-        c.append(cirq.CNOT(q[0], q[1]))
-        c = device.decompose_circuit(circuit=c)
+        circuit.append(cirq.H(q[0]))
+        circuit.append(cirq.CNOT(q[0], q[1]))
 
-        if args.noise == True:
-            c = add_simulator_noise(q, 0.01)
+        circuit.append(cirq.measure(*q, key="M"))
 
-        c.append(cirq.measure(*q, key="M"))
-        run = backend.run(c, repetitions=shots).histogram(key="M")
-        vd = 0
-        fid1 = 0
-        for i in range(4):
-            vd += np.abs(run[i] / shots - id_dist[i])
+        decomposed_circuit = adonis.decompose_circuit(circuit)
+
+        result = sampler.run(decomposed_circuit, repetitions=shots)
+        counts = result.histogram(key='M', fold_func=fold_func)
+
+        values = counts.values()
+        values_list = list(values)
+
+        vd = 0  # Variational distance
+        fid1 = 0  # Fidelity
+        for i in range(len(counts)):
+            vd += np.abs(values_list[i] / shots - id_dist[i])
             vd = 0.5 * vd
-            fid1 += np.sqrt((run[i] / shots) * id_dist[i])
+            fid1 += np.sqrt((values_list[i] / shots) * id_dist[i])
 
         bell_vd.append(vd)
 
-        if args.verbose == True:
+        if args.verbose:
             print(" ")
-            print(c)
+            print(circuit)
+            print(counts)
             print(" ")
 
         print("Fidelity = ", round(fid1, 3))
@@ -146,26 +130,28 @@ def main():
     id_dist[31] = 0.5
 
     q = [cirq.NamedQubit(f"QB{j + 1}") for j in range(5)]
-    c = cirq.Circuit()
+    circuit = cirq.Circuit()
 
-    c.append(cirq.H(q[2]))
+    circuit.append(cirq.H(q[2]))
     for qb in [0, 1, 3, 4]:
-        c.append(cirq.CNOT(q[2], q[qb]))
+        circuit.append(cirq.CNOT(q[2], q[qb]))
 
-    c = device.decompose_circuit(circuit=c)
+    circuit.append(cirq.measure(*q, key="M"))
 
-    if args.noise == True:
-        c = add_simulator_noise(q, 0.01)
+    decomposed_circuit = adonis.decompose_circuit(circuit)
 
-    c.append(cirq.measure(*q, key="M"))
+    result = sampler.run(decomposed_circuit, repetitions=shots)
+    counts = result.histogram(key='M', fold_func=fold_func)
 
-    run = backend.run(c, repetitions=shots).histogram(key="M")
+    values = counts.values()
+    values_list = list(values)
+
     vd = 0
     fid2 = 0
-    for i in range(32):
-        vd += np.sum(np.abs(run[i] / shots - id_dist[i]))
+    for i in range(len(counts)):
+        vd += np.abs(values_list[i] / shots - id_dist[i])
         vd = 0.5 * vd
-        fid2 += np.sqrt((run[i] / shots) * id_dist[i])
+        fid2 += np.sqrt((values_list[i] / shots) * id_dist[i])
 
     print(" ")
     print(offset + "================================ ")
@@ -173,9 +159,10 @@ def main():
     print(offset + "================================ ")
     print(" ")
 
-    if args.verbose == True:
+    if args.verbose:
         print(" ")
-        print(c)
+        print(circuit)
+        print(counts)
 
     print(offset_2 + "GHZ-5 -> Fidelity = ", round(fid2, 3))
     print(offset_2 + "GHZ-5 -> Distance from target ([0,1]) = ", round(vd, 3))
