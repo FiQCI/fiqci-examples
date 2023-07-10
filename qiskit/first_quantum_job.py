@@ -36,7 +36,7 @@ exp_result = job.result()._get_experiment(circuit)
 print("Job ID: ", job.job_id())
 # print(result.request.circuits)
 print("Calibration Set ID: ", exp_result.calibration_set_id)
-print(result.request.qubit_mapping)
+# print(result.request.qubit_mapping)
 # print(result.request.shots)
 
 counts = result.get_counts()
