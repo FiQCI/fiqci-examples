@@ -17,7 +17,7 @@ from typing import List, Tuple
 
 def get_args():
     parser = argparse.ArgumentParser(description="Qubit flipping options", formatter_class=RawTextHelpFormatter)
-    parser.add_argument("--backend", choices=['helmi', 'simulator'], default='simulator',
+    parser.add_argument("--backend", choices=['helmi', 'simulator'],
                         help="Backend to use: 'helmi' or 'simulator'", required=True)
     parser.add_argument("--qubits", type=int, nargs='+',
                         help="List of qubits to flip. If not specified, will flip all qubits.")

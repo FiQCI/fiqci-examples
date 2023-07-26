@@ -53,10 +53,9 @@ def get_args():
         'aer'/'simulator' runs on Qiskit's aer simulator, 
         'helmi' runs on VTT Helmi Quantum Computer
         """,
-        required=False,
+        required=True,
         type=str,
-        default="helmi",
-        choices=["helmi", "simulator"],
+        choices=["helmi", "simulator"]
     )
 
     args_parser.add_argument(
