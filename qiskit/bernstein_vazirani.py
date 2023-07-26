@@ -1,10 +1,10 @@
 import os
 import argparse
+from argparse import RawTextHelpFormatter
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, Aer, transpile
 from qiskit_iqm import IQMProvider
 from random import randint
 from collections import Counter
-from argparse import RawTextHelpFormatter
 
 """
 
@@ -122,7 +122,6 @@ def get_args():
         epilog="""Example usage:
         python bernstein_vazirani.py --backend helmi
         python bernstein_vazirani.py --backend simulator
-        python bernstein_vazirani.py --backend simulator
         python bernstein_vazirani.py --backend helmi -v (prints circuits)
         """,
     )
@@ -135,10 +134,9 @@ def get_args():
         'aer'/'simulator' runs on Qiskit's aer simulator, 
         'helmi' runs on VTT Helmi Quantum Computer
         """,
-        required=False,
+        required=True,
         type=str,
-        default=None,
-        choices=["helmi", "simulator"],
+        choices=["helmi", "simulator"]
     )
 
     args_parser.add_argument(

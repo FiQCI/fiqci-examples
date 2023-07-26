@@ -39,7 +39,7 @@ def get_args():
         """,
         required=True,
         type=str,
-        default=None,
+        choices=["helmi", "simulator"]
     )
 
     args_parser.add_argument(
