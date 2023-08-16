@@ -83,10 +83,11 @@ def main():
         if not HELMI_CORTEX_URL:
             raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
         provider = IQMProvider(HELMI_CORTEX_URL)
+        backend = provider.get_backend()
     else:
         provider = Aer
+        backend = provider.get_backend('aer_simulator')
 
-    backend = provider.get_backend('aer_simulator')
 
     shots = 10000
 
