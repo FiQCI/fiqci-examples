@@ -6,8 +6,13 @@ from cirq_iqm.iqm_sampler import IQMSampler
 import os
 import sympy
 from cirq_iqm.optimizers import simplify_circuit
+import numpy as np
 
-from utils import fold_func
+
+def fold_func(x: np.ndarray) -> str:
+    """Fold the measured bit arrays into strings."""
+    return ''.join(map(lambda x: chr(x + ord('0')), x))
+
 
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 sampler = IQMSampler(HELMI_CORTEX_URL)

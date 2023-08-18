@@ -9,8 +9,12 @@ import cirq
 from cirq_iqm.iqm_sampler import IQMSampler
 
 from typing import List
+import numpy as np
 
-from utils import fold_func
+
+def fold_func(x: np.ndarray) -> str:
+    """Fold the measured bit arrays into strings."""
+    return ''.join(map(lambda x: chr(x + ord('0')), x))
 
 
 def get_args():
