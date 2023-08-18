@@ -4,12 +4,13 @@ A more advanced example to flip qubits with either Helmi or the simulator.
 import os
 import argparse
 from argparse import RawTextHelpFormatter
-import numpy as np
 
 import cirq
 from cirq_iqm.iqm_sampler import IQMSampler
 
 from typing import List
+
+from .utils import fold_func
 
 
 def get_args():
@@ -31,11 +32,6 @@ def calculate_success_probability(counts: dict, shots: int, desired_state: str) 
     """
     success_counts = counts.get(desired_state, 0)
     return success_counts / shots
-
-
-def fold_func(x: np.ndarray) -> str:
-    """Fold the measured bit arrays into strings."""
-    return ''.join(map(lambda x: chr(x + ord('0')), x))
 
 
 def single_flip_circuit(qubit: int):

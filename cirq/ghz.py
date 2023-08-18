@@ -7,6 +7,8 @@ from cirq_iqm.iqm_sampler import IQMSampler
 from cirq_iqm import Adonis
 import numpy as np
 
+from .utils import fold_func
+
 """
 
 This example creates a 5 qubit GHZ stats in cirq
@@ -53,11 +55,6 @@ def get_args():
     )
 
     return args_parser.parse_args()
-
-
-def fold_func(x: np.ndarray) -> str:
-    """Fold the measured bit arrays into strings."""
-    return ''.join(map(lambda x: chr(x + ord('0')), x))
 
 
 def main():
