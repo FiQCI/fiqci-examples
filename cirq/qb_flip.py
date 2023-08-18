@@ -10,7 +10,7 @@ from cirq_iqm.iqm_sampler import IQMSampler
 
 from typing import List
 
-from .utils import fold_func
+from utils import fold_func
 
 
 def get_args():

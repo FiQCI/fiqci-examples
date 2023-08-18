@@ -7,7 +7,7 @@ from cirq_iqm.iqm_sampler import IQMSampler
 from cirq_iqm import Adonis
 import numpy as np
 
-from .utils import fold_func
+from utils import fold_func
 
 """
 
