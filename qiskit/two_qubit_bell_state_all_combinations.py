@@ -1,18 +1,18 @@
 """
-Two qubit Bell state combinations examples. 
+Two qubit Bell state combinations examples.
 Kindly contributed by JLenssen
 """
+import collections
 import os
-from qiskit import QuantumCircuit, QuantumRegister, Aer, execute
-from qiskit_iqm import IQMProvider
+import time
+from datetime import datetime
+from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
+from qiskit_iqm import IQMProvider
 
-import collections
-from itertools import product
-import time
-from datetime import datetime
+from qiskit import Aer, QuantumCircuit, QuantumRegister, execute
 
 SIMULATE = False
 SHOTS = 1000
@@ -22,7 +22,8 @@ state2index = {'00': (0, 0), '10': (1, 0), '11': (1, 1), '01': (0, 1)}
 
 center_qubit = [2]
 leaf_qubits = [0, 1, 3, 4]
-qubit_combinations = list(product(center_qubit, leaf_qubits)) + list(product(leaf_qubits, center_qubit))
+qubit_combinations = list(product(center_qubit, leaf_qubits)) + \
+    list(product(leaf_qubits, center_qubit))
 
 fig, axs = plt.subplots(4, 2, figsize=(10, 10))
 
@@ -73,6 +74,8 @@ for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
 
 now = datetime.now()
 formatted_date = now.strftime("%d.%m.%Y")
-plt.suptitle(f"Bell State experiment ($\\frac{{1}}{{\\sqrt{{2}}}} |00\\rangle + |11\\rangle$) - {formatted_date}")
+plt.suptitle(
+    f"Bell State experiment ($\\frac{{1}}{{\\sqrt{{2}}}} |00\\rangle + |11\\rangle$) - {formatted_date}",
+)
 plt.tight_layout()
 plt.savefig('test.png', dpi=200)

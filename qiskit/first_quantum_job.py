@@ -1,8 +1,8 @@
 import os
 
-from qiskit import QuantumCircuit, QuantumRegister
-from qiskit import execute
 from qiskit_iqm import IQMProvider
+
+from qiskit import QuantumCircuit, QuantumRegister, execute
 
 shots = 1000
 
