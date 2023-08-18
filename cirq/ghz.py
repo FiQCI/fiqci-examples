@@ -15,7 +15,7 @@ def fold_func(x: np.ndarray) -> str:
 
 """
 
-This example creates a 5 qubit GHZ stats in cirq
+This example creates a 5 qubit GHZ state in cirq
 
 First a Bell state is prepared between QB3 and all the other qubits.
 From this we can measure the trace distance between QB3 and each of the other qubits.
