@@ -1,12 +1,14 @@
 """
-This advanced example demonstrates how one can submit a list if circuits with a parameter sweep.
+This advanced example demonstrates how one can submit a list of circuits with a parameter sweep.
 """
-import cirq
-from cirq_iqm.iqm_sampler import IQMSampler
 import os
-import sympy
-from cirq_iqm.optimizers import simplify_circuit
+
 import numpy as np
+import sympy
+from cirq_iqm.iqm_sampler import IQMSampler
+from cirq_iqm.optimizers import simplify_circuit
+
+import cirq
 
 
 def fold_func(x: np.ndarray) -> str:
@@ -40,10 +42,14 @@ num_sweeps_in_circuit = 10
 
 # Create each circuit and corresponding parameter sweep
 for i in range(num_circuits_in_batch):
-    param_sweep = cirq.Linspace(theta.name, start=0, stop=1, length=num_sweeps_in_circuit)
+    param_sweep = cirq.Linspace(
+        theta.name, start=0, stop=1, length=num_sweeps_in_circuit,
+    )
     for param_values in param_sweep:
         # Resolve the parameters for the circuit
-        resolved_circuit = cirq.resolve_parameters(circuit_template, param_values)
+        resolved_circuit = cirq.resolve_parameters(
+            circuit_template, param_values,
+        )
         decomposed_circuit = device.decompose_circuit(resolved_circuit)
         routed_circuit, _, _ = device.route_circuit(decomposed_circuit)
         simplified_circuit = simplify_circuit(routed_circuit)
