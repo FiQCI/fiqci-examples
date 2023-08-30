@@ -1,9 +1,10 @@
-import os
 import argparse
+import os
 from argparse import RawTextHelpFormatter
-from qiskit import QuantumCircuit, QuantumRegister, Aer, execute
 
 from qiskit_iqm import IQMProvider
+
+from qiskit import Aer, QuantumCircuit, QuantumRegister, execute
 
 """
 Create and measure a bell state. User lists the pairs to entangle.
@@ -33,12 +34,12 @@ def get_args():
         "--backend",
         help="""
         Define the backend for running the program.
-        'aer'/'simulator' runs on Qiskit's aer simulator, 
+        'aer'/'simulator' runs on Qiskit's aer simulator,
         'helmi' runs on the Helmi Quantum Computer
         """,
         required=True,
         type=str,
-        choices=["helmi", "simulator"]
+        choices=["helmi", "simulator"],
     )
 
     args_parser.add_argument(
@@ -63,7 +64,9 @@ def main():
     if args.backend == 'helmi':
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            raise ValueError(
+                "Environment variable HELMI_CORTEX_URL is not set",
+            )
         provider = IQMProvider(HELMI_CORTEX_URL)
         backend = provider.get_backend()
     else:

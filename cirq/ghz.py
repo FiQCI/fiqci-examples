@@ -1,11 +1,12 @@
-import os
 import argparse
+import os
 from argparse import RawTextHelpFormatter
 
-import cirq
-from cirq_iqm.iqm_sampler import IQMSampler
-from cirq_iqm import Adonis
 import numpy as np
+from cirq_iqm import Adonis
+from cirq_iqm.iqm_sampler import IQMSampler
+
+import cirq
 
 
 def fold_func(x: np.ndarray) -> str:
@@ -20,7 +21,7 @@ This example creates a 5 qubit GHZ state in cirq
 First a Bell state is prepared between QB3 and all the other qubits.
 From this we can measure the trace distance between QB3 and each of the other qubits.
 
-A 5 qubit GHZ state is then created 
+A 5 qubit GHZ state is then created
 
 
 """
@@ -31,7 +32,7 @@ adonis = Adonis()
 def get_args():
 
     args_parser = argparse.ArgumentParser(
-        description="Single qubit flipping.", formatter_class=RawTextHelpFormatter
+        description="Single qubit flipping.", formatter_class=RawTextHelpFormatter,
     )
 
     # Parse Arguments
@@ -40,12 +41,12 @@ def get_args():
         "--backend",
         help="""
         Define the backend for running the program.
-        'simulator' runs on Cirq's Simulator, 
+        'simulator' runs on Cirq's Simulator,
         'helmi' runs on VTT Helmi Quantum Computer
         """,
         required=True,
         type=str,
-        choices=["helmi", "simulator"]
+        choices=["helmi", "simulator"],
     )
 
     args_parser.add_argument(
@@ -71,7 +72,9 @@ def main():
     if args.backend == 'helmi':
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            raise ValueError(
+                "Environment variable HELMI_CORTEX_URL is not set",
+            )
         sampler = IQMSampler(HELMI_CORTEX_URL)
     else:
         sampler = cirq.Simulator()
