@@ -1,16 +1,18 @@
-import os
 import argparse
+import os
 from argparse import RawTextHelpFormatter
-from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister, execute, Aer, transpile
-from qiskit_iqm import IQMProvider
-from random import randint
 from collections import Counter
+from random import randint
+
+from qiskit_iqm import IQMProvider
+
+from qiskit import Aer, ClassicalRegister, QuantumCircuit, QuantumRegister, execute, transpile
 
 """
 
-This example shows the Bernstein-Vazirani Algorithm. 
-Bernstein-Vazirani Algorithm is an extension of the Deutsch-Joza algorithm. The algorithm tries to search 
-for a bit string from a hidden function. 
+This example shows the Bernstein-Vazirani Algorithm.
+Bernstein-Vazirani Algorithm is an extension of the Deutsch-Joza algorithm. The algorithm tries to search
+for a bit string from a hidden function.
 
 The Solution:
 
@@ -20,8 +22,8 @@ The Solution:
 - Apply Hadamard gates to the input qubits
 - Measure
 
-This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence only needing a classical register 
-of size 4 despite having a quantum register of size 5. 
+This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence only needing a classical register
+of size 4 despite having a quantum register of size 5.
 
 """
 offset = " " * 37
@@ -127,12 +129,12 @@ def get_args():
         "--backend",
         help="""
         Define the backend for running the program.
-        'aer'/'simulator' runs on Qiskit's aer simulator, 
+        'aer'/'simulator' runs on Qiskit's aer simulator,
         'helmi' runs on VTT Helmi Quantum Computer
         """,
         required=True,
         type=str,
-        choices=["helmi", "simulator"]
+        choices=["helmi", "simulator"],
     )
 
     args_parser.add_argument(
@@ -215,7 +217,9 @@ def main():
     if args.backend == 'helmi':
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            raise ValueError(
+                "Environment variable HELMI_CORTEX_URL is not set",
+            )
         provider = IQMProvider(HELMI_CORTEX_URL)
         backend = provider.get_backend()
     else:
@@ -223,7 +227,9 @@ def main():
         backend = provider.get_backend('aer_simulator')
 
     if args.number is not None and args.number > 15:
-        raise ValueError("ERROR! Guess must be a 4 bit string number or lower. Less than or equal to 15.")
+        raise ValueError(
+            "ERROR! Guess must be a 4 bit string number or lower. Less than or equal to 15.",
+        )
 
     print("Running on backend = ", args.backend)
 
@@ -233,12 +239,12 @@ def main():
         NUM = randint(0, 15)
         print(
             offset
-            + "The hidden oracle number was chosen randomly and will not be disclosed."
+            + "The hidden oracle number was chosen randomly and will not be disclosed.",
         )
     else:
         print(
             offset
-            + f"The hidden oracle number is s = {NUM}. In general it is not dislosed to the testing party."
+            + f"The hidden oracle number is s = {NUM}. In general it is not dislosed to the testing party.",
         )
 
     bv = BVoracle(num=NUM, backend=backend, verbose=args.verbose)
@@ -257,7 +263,7 @@ def main():
 
         print(
             offset
-            + f"Guessed outcome is s = {int(s,2)} (binary number {s}) found in {amt} shots out of 1 repeats."
+            + f"Guessed outcome is s = {int(s,2)} (binary number {s}) found in {amt} shots out of 1 repeats.",
         )
         print(offset + f"Quantum oracle was called {bv.qcalls} time(s).")
         print("\n")
@@ -290,7 +296,7 @@ def main():
                 + str(binary[i])
                 + "         "
                 + str(qcalls[i])
-                + ""
+                + "",
             )
 
 

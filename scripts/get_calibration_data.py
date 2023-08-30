@@ -1,8 +1,8 @@
-from iqm_client import IQMClient  # Requires iqm_client==12.5
-import os
-import requests
 import json
+import os
 
+import requests
+from iqm_client import IQMClient  # Requires iqm_client==12.5
 from qiskit_iqm import IQMProvider
 
 

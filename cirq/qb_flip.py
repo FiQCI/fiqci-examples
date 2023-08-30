@@ -1,27 +1,36 @@
 """
 A more advanced example to flip qubits with either Helmi or the simulator.
 """
-import os
 import argparse
+import os
 from argparse import RawTextHelpFormatter
-import numpy as np
 
-import cirq
+import numpy as np
 from cirq_iqm.iqm_sampler import IQMSampler
 
-from typing import List
+import cirq
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Qubit flipping options", formatter_class=RawTextHelpFormatter)
-    parser.add_argument("--backend", choices=['helmi', 'simulator'],
-                        help="Backend to use: 'helmi' or 'simulator'", required=True)
-    parser.add_argument("--qubits", type=int, nargs='+',
-                        help="List of qubits to flip. If not specified, will flip all qubits.")
-    parser.add_argument("--shots", type=int, default=1000,
-                        help="Number of shots to run the circuit. Default is 1000.")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Verbose output")
+    parser = argparse.ArgumentParser(
+        description="Qubit flipping options", formatter_class=RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "--backend", choices=['helmi', 'simulator'],
+        help="Backend to use: 'helmi' or 'simulator'", required=True,
+    )
+    parser.add_argument(
+        "--qubits", type=int, nargs='+',
+        help="List of qubits to flip. If not specified, will flip all qubits.",
+    )
+    parser.add_argument(
+        "--shots", type=int, default=1000,
+        help="Number of shots to run the circuit. Default is 1000.",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true",
+        help="Verbose output",
+    )
     return parser.parse_args()
 
 
@@ -50,7 +59,7 @@ def single_flip_circuit(qubit: int):
     return circuit
 
 
-def flip_circuit(qubits: List[int]):
+def flip_circuit(qubits: list[int]):
     """
     Creates a quantum circuit with X gates applied to the qubits specified in the input list.
     """
@@ -62,14 +71,16 @@ def flip_circuit(qubits: List[int]):
     return circuit
 
 
-def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
+def flip_qubits(qubits: list[int], backend: str, shots: int, verbose: bool):
     """
     Function to run the flip circuit
     """
     if backend == 'helmi':
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            raise ValueError(
+                "Environment variable HELMI_CORTEX_URL is not set",
+            )
         sampler = IQMSampler(HELMI_CORTEX_URL)
     else:
         sampler = cirq.Simulator()
@@ -95,9 +106,13 @@ def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
         counts = result.histogram(key='M', fold_func=fold_func)
 
         if qubits is None:
-            success_probability = calculate_success_probability(counts, shots, '11111')
+            success_probability = calculate_success_probability(
+                counts, shots, '11111',
+            )
         else:
-            success_probability = calculate_success_probability(counts, shots, '1')
+            success_probability = calculate_success_probability(
+                counts, shots, '1',
+            )
 
         print("\nCounts:", counts)
 

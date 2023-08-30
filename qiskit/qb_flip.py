@@ -1,30 +1,35 @@
 """
 A more advanced example to flip qubits with either Helmi or the simulator.
 """
-import os
 import argparse
+import os
 from argparse import RawTextHelpFormatter
-
-
-from qiskit import QuantumCircuit, QuantumRegister
-from qiskit import execute
-from qiskit import Aer
 
 from qiskit_iqm import IQMProvider
 
-from typing import List, Tuple
+from qiskit import Aer, QuantumCircuit, QuantumRegister, execute
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Qubit flipping options", formatter_class=RawTextHelpFormatter)
-    parser.add_argument("--backend", choices=['helmi', 'simulator'],
-                        help="Backend to use: 'helmi' or 'simulator'", required=True)
-    parser.add_argument("--qubits", type=int, nargs='+',
-                        help="List of qubits to flip. If not specified, will flip all qubits.")
-    parser.add_argument("--shots", type=int, default=1000,
-                        help="Number of shots to run the circuit. Default is 1000.")
-    parser.add_argument("--verbose", "-v", action="store_true",
-                        help="Verbose output")
+    parser = argparse.ArgumentParser(
+        description="Qubit flipping options", formatter_class=RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "--backend", choices=['helmi', 'simulator'],
+        help="Backend to use: 'helmi' or 'simulator'", required=True,
+    )
+    parser.add_argument(
+        "--qubits", type=int, nargs='+',
+        help="List of qubits to flip. If not specified, will flip all qubits.",
+    )
+    parser.add_argument(
+        "--shots", type=int, default=1000,
+        help="Number of shots to run the circuit. Default is 1000.",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true",
+        help="Verbose output",
+    )
     return parser.parse_args()
 
 
@@ -36,7 +41,7 @@ def calculate_success_probability(counts: dict, shots: int, desired_state: str) 
     return success_counts / shots
 
 
-def flip_circuit(qubits: List[int]) -> Tuple[QuantumCircuit, dict]:
+def flip_circuit(qubits: list[int]) -> tuple[QuantumCircuit, dict]:
     """
     Creates a quantum circuit with X gates applied to the qubits specified in the input list.
     Returns the circuit and a mapping of qubits.
@@ -50,7 +55,7 @@ def flip_circuit(qubits: List[int]) -> Tuple[QuantumCircuit, dict]:
     return qc, mapping
 
 
-def single_flip_circuit(qubit: int) -> Tuple[QuantumCircuit, dict]:
+def single_flip_circuit(qubit: int) -> tuple[QuantumCircuit, dict]:
     """
     Returns a 1-qubit circuit with an X gate to flip the qubit from |0> to |1>.
     Also returns the correct mapping.
@@ -63,14 +68,16 @@ def single_flip_circuit(qubit: int) -> Tuple[QuantumCircuit, dict]:
     return qc, mapping
 
 
-def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
+def flip_qubits(qubits: list[int], backend: str, shots: int, verbose: bool):
     """
     Function to run the flip circuit
     """
     if backend == 'helmi':
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            raise ValueError(
+                "Environment variable HELMI_CORTEX_URL is not set",
+            )
         provider = IQMProvider(HELMI_CORTEX_URL)
         backend = provider.get_backend()
     else:
@@ -102,9 +109,13 @@ def flip_qubits(qubits: List[int], backend: str, shots: int, verbose: bool):
             print(job.result().request.qubit_mapping)
 
         if qubits is None:
-            success_probability = calculate_success_probability(counts, shots, '11111')
+            success_probability = calculate_success_probability(
+                counts, shots, '11111',
+            )
         else:
-            success_probability = calculate_success_probability(counts, shots, '1')
+            success_probability = calculate_success_probability(
+                counts, shots, '1',
+            )
 
         print("\nCounts:", counts)
 
