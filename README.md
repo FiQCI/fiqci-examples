@@ -7,3 +7,7 @@ Documentation on using Cirq Examples can be viewed [here](cirq/README.md).
 Documentation on using Qiskit Examples can be viewed [here](qiskit/README.md).
 
 Scripts to aid in the execution of examples can be found under the `scripts` directory.
+
+## Adding examples
+
+Before adding examples it is recommended to install [pre-commit](https://pre-commit.com/).
