@@ -23,10 +23,6 @@ The Solution:
 This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence only needing a classical register 
 of size 4 despite having a quantum register of size 5. 
 
-This example also makes use of the Helmi.routing tool to map the "output" qubit onto QB3 for Helmi's topology. 
-
-
-
 """
 offset = " " * 37
 offset_2 = " " * 10
