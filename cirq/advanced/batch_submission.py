@@ -2,8 +2,10 @@
 This example demonstrates how to submit multiple circuits as a batch using IQMSampler.
 """
 import os
-import cirq
+
 from cirq_iqm.iqm_sampler import IQMSampler
+
+import cirq
 
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 sampler = IQMSampler(HELMI_CORTEX_URL)
