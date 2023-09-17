@@ -1,12 +1,14 @@
 """
 This advanced example demonstrates how to use the run_sweep method to sweep a set of parameters in a circuit
 """
-import cirq
-from cirq_iqm.iqm_sampler import IQMSampler
 import os
-import sympy
-from cirq_iqm.optimizers import simplify_circuit
+
 import numpy as np
+import sympy
+from cirq_iqm.iqm_sampler import IQMSampler
+from cirq_iqm.optimizers import simplify_circuit
+
+import cirq
 
 
 def fold_func(x: np.ndarray) -> str:
@@ -39,7 +41,9 @@ routed_circuit, _, _ = device.route_circuit(decomposed_circuit)
 simplified_circuit = simplify_circuit(routed_circuit)
 
 params = cirq.Linspace(key="theta", start=0, stop=0.5, length=3)
-results = sampler.run_sweep(simplified_circuit, repetitions=1000, params=params)
+results = sampler.run_sweep(
+    simplified_circuit, repetitions=1000, params=params,
+)
 
 for result in results:
     print(f'{result.params}: {result.histogram(key="m", fold_func=fold_func)}')
