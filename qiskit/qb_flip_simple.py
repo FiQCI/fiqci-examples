@@ -56,7 +56,6 @@ def main():
     print("\nFlip one qubit at a time\n")
     for qb in range(5):
         circuit, mapping = single_flip_circuit(qb)
-        shots = 1000
         job = execute(circuit, backend, shots=shots, initial_layout=mapping)
         # assert that the mapping is correct
         assert 'QB' + \
