@@ -41,3 +41,7 @@ repos:
   hooks:
   - id: flake8
     args: [--max-line-length=120]
+
+# pre-commit.ci config reference: https://pre-commit.ci/#configuration
+ci:
+  autoupdate_schedule: monthly
