@@ -3,7 +3,7 @@ This example demonstrates how to submit multiple circuits as a batch using IQMSa
 """
 import os
 
-from cirq_iqm.iqm_sampler import IQMSampler
+from iqm.cirq_iqm import IQMSampler
 
 import cirq
 

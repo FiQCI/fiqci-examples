@@ -3,8 +3,7 @@ import os
 from argparse import RawTextHelpFormatter
 
 import numpy as np
-from cirq_iqm import Adonis
-from cirq_iqm.iqm_sampler import IQMSampler
+from iqm.cirq_iqm import IQMSampler, Adonis
 
 import cirq
 

@@ -4,7 +4,7 @@ from argparse import RawTextHelpFormatter
 from collections import Counter
 from random import randint
 
-from qiskit_iqm import IQMProvider
+from iqm.qiskit_iqm import IQMProvider
 
 from qiskit import Aer, ClassicalRegister, QuantumCircuit, QuantumRegister, execute, transpile
 

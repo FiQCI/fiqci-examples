@@ -2,8 +2,8 @@ import json
 import os
 
 import requests
-from iqm_client import IQMClient  # Requires iqm_client==12.5
-from qiskit_iqm import IQMProvider
+from iqm.iqm_client import IQMClient  # Requires iqm_client==15.3
+from iqm.qiskit_iqm import IQMProvider
 
 
 def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: str = None):
