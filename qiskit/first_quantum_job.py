@@ -1,6 +1,6 @@
 import os
 
-from qiskit_iqm import IQMProvider
+from iqm.qiskit_iqm import IQMProvider
 
 from qiskit import QuantumCircuit, QuantumRegister, execute
 

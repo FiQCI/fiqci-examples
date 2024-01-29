@@ -5,8 +5,8 @@ import os
 
 import numpy as np
 import sympy
-from cirq_iqm.iqm_sampler import IQMSampler
-from cirq_iqm.optimizers import simplify_circuit
+from iqm.cirq_iqm import IQMSampler
+from iqm.cirq_iqm.optimizers import simplify_circuit
 
 import cirq
 
