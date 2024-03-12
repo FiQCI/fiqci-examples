@@ -16,7 +16,7 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
     bearer_token = client._get_bearer_token()
     headers['Authorization'] = bearer_token
 
-    url = os.path.join(client._base_url, 'calibration')
+    url = os.path.join(client._base_url, 'calibration/metrics/latest')
     if calibration_set_id:
         url = os.path.join(url, calibration_set_id)
 
