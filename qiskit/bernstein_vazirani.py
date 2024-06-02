@@ -244,7 +244,9 @@ def main():
     else:
         print(
             offset
-            + f"The hidden oracle number is s = {NUM}. In general it is not dislosed to the testing party.",
+            + f"The hidden oracle number is s = {
+                NUM
+            }. In general it is not dislosed to the testing party.",
         )
 
     bv = BVoracle(num=NUM, backend=backend, verbose=args.verbose)
@@ -263,7 +265,9 @@ def main():
 
         print(
             offset
-            + f"Guessed outcome is s = {int(s,2)} (binary number {s}) found in {amt} shots out of 1 repeats.",
+            + f"Guessed outcome is s = {int(s, 2)} (binary number {s}) found in {
+                amt
+            } shots out of 1 repeats.",
         )
         print(offset + f"Quantum oracle was called {bv.qcalls} time(s).")
         print("\n")

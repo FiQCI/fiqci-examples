@@ -63,7 +63,9 @@ def main():
         counts = job.result().get_counts()
         success_probability = calculate_success_probability(counts, shots, '1')
         print(
-            f"QB{qb + 1} -> {counts}, Success probability: {success_probability * 100:.2f}%",
+            f"QB{
+                qb + 1
+            } -> {counts}, Success probability: {success_probability * 100:.2f}%",
         )
 
     print("\nFlip all qubits at once\n")
@@ -72,7 +74,9 @@ def main():
     counts = job.result().get_counts()
     success_probability = calculate_success_probability(counts, shots, '11111')
     print(
-        f"Counts: {counts}, \nSuccess probability: {success_probability * 100:.2f}%",
+        f"Counts: {counts}, \nSuccess probability: {
+            success_probability * 100:.2f
+        }%",
     )
 
 
