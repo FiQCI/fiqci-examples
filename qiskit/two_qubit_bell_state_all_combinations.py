@@ -75,7 +75,9 @@ for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
 now = datetime.now()
 formatted_date = now.strftime("%d.%m.%Y")
 plt.suptitle(
-    f"Bell State experiment ($\\frac{{1}}{{\\sqrt{{2}}}} |00\\rangle + |11\\rangle$) - {formatted_date}",
+    f"Bell State experiment ($\\frac{{1}}{{\\sqrt{{2}}}} |00\\rangle + |11\\rangle$) - {
+        formatted_date
+    }",
 )
 plt.tight_layout()
 plt.savefig('test.png', dpi=200)
