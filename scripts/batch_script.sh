@@ -15,4 +15,7 @@ module load helmi_qiskit  # Load the module to use qiskit on Helmi
 
 # module load helmi_cirq    # Load the module to use cirq on Helmi
 
+# Save the job ID to a file for later reference
+echo $SLURM_JOB_ID >> job_id.txt
+
 python -u $1
