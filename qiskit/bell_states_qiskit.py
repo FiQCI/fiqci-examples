@@ -3,8 +3,7 @@ import os
 from argparse import RawTextHelpFormatter
 
 from iqm.qiskit_iqm import IQMProvider
-
-from qiskit import Aer, QuantumCircuit, QuantumRegister, execute
+from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
 
 """
 Create and measure a bell state. User lists the pairs to entangle.

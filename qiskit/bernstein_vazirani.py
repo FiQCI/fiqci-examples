@@ -5,8 +5,7 @@ from collections import Counter
 from random import randint
 
 from iqm.qiskit_iqm import IQMProvider
-
-from qiskit import Aer, ClassicalRegister, QuantumCircuit, QuantumRegister, execute, transpile
+from qiskit_aer import Aer, ClassicalRegister, QuantumCircuit, QuantumRegister, execute, transpile
 
 """
 

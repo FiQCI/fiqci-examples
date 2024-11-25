@@ -4,8 +4,7 @@ from argparse import RawTextHelpFormatter
 
 import numpy as np
 from iqm.qiskit_iqm import IQMProvider
-
-from qiskit import Aer, QuantumCircuit, QuantumRegister, execute
+from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
 
 """
 
