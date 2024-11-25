@@ -6,7 +6,6 @@ import os
 from argparse import RawTextHelpFormatter
 
 from iqm.qiskit_iqm import IQMProvider
-
 from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
 
 

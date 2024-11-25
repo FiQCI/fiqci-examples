@@ -11,7 +11,6 @@ from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 from iqm.qiskit_iqm import IQMProvider
-
 from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
 
 SIMULATE = False
