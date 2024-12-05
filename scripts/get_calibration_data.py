@@ -16,11 +16,17 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
     bearer_token = client._token_manager.get_bearer_token()
     headers['Authorization'] = bearer_token
 
-    url = os.path.join(client._api.iqm_server_url, 'calibration/metrics/latest')
+    url = os.path.join(
+        client._api.iqm_server_url,
+        'calibration/metrics/latest',
+    )
     if calibration_set_id:
         url = os.path.join(url, calibration_set_id)
     else:
-        url = os.path.join(client._api.iqm_server_url, 'calibration/metrics/latest')
+        url = os.path.join(
+            client._api.iqm_server_url,
+            'calibration/metrics/latest',
+        )
 
     response = requests.get(url, headers=headers)
     response.raise_for_status()  # will raise an HTTPError if the response was not ok
