@@ -13,12 +13,14 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
     Optionally save the response to a json file, if filename is provided
     """
     headers = {'User-Agent': client._signature}
-    bearer_token = client._get_bearer_token()
+    bearer_token = client._token_manager.get_bearer_token()
     headers['Authorization'] = bearer_token
 
-    url = os.path.join(client._base_url, 'calibration/metrics/latest')
+    url = os.path.join(client._api.iqm_server_url, 'calibration/metrics/latest')
     if calibration_set_id:
         url = os.path.join(url, calibration_set_id)
+    else:
+        url = os.path.join(client._api.iqm_server_url, 'calibration/metrics/latest')
 
     response = requests.get(url, headers=headers)
     response.raise_for_status()  # will raise an HTTPError if the response was not ok
@@ -36,7 +38,7 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
 
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 if not HELMI_CORTEX_URL:
-    raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    raise ValueError('Environment variable HELMI_CORTEX_URL is not set')
 
 # Using Qiskit as an example of how to query using this function.
 
