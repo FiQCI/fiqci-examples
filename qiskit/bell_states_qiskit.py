@@ -3,7 +3,9 @@ import os
 from argparse import RawTextHelpFormatter
 
 from iqm.qiskit_iqm import IQMProvider
-from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
+from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
+from qiskit import QuantumCircuit, QuantumRegister, transpile
+from qiskit_aer import Aer
 
 """
 Create and measure a bell state. User lists the pairs to entangle.
@@ -15,6 +17,11 @@ Compare simulator vs real devices. CNOT gate on different target/control qubits 
 
 """
 
+def print_header(s):
+    """
+    Prints a section header.
+    """
+    print("\n" + f"=== {s.upper()} ===")
 
 def get_args():
 
@@ -58,31 +65,28 @@ def main():
 
     args = get_args()
 
+    backend = IQMFakeAdonis()
     print("Running on backend = ", args.backend)
 
     if args.backend == 'helmi':
+        # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError(
-                "Environment variable HELMI_CORTEX_URL is not set",
-            )
-        provider = IQMProvider(HELMI_CORTEX_URL)
-        backend = provider.get_backend()
+            print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
+            #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+
+        else:
+            provider = IQMProvider(HELMI_CORTEX_URL)
+            backend = provider.get_backend()
     else:
         provider = Aer
         backend = provider.get_backend('aer_simulator')
 
-    print(" ")
-    print("   Preparing a Bell State")
-    print("   |00> + |11> / sqrt(2)")
-    print(" ")
-
-    offset = " " * 10
-    offset2 = " " * 20
+    print_header("Preparing a Bell State: |00> + |11> / sqrt(2)")
 
     for qb in [0, 1, 3, 4]:
 
-        print(offset + "Control: QB" + str(qb + 1) + "  Target: QB3 -> ")
+        print_header("Control: QB" + str(qb + 1) + "  Target: QB3 -> ")
         qreg = QuantumRegister(2, "qB")
         qc = QuantumCircuit(qreg)
 
@@ -93,25 +97,35 @@ def main():
         if args.verbose:
             print(qc.draw())
 
-        shots = 10000
+        shots = 1000
 
         qubit_mapping = {
             qreg[0]: qb,
             qreg[1]: 2,
         }
 
-        job = execute(qc, backend, shots=shots, initial_layout=qubit_mapping)
+        qc = transpile(qc, backend, optimization_level=0, initial_layout=qubit_mapping)
+
+        if args.verbose:
+            print(qc.draw())
+
+        job = backend.run(qc, shots=shots)
 
         counts = job.result().get_counts()
 
         if args.verbose and "IQM" in str(backend):
             print("Mapping")
-            print(job.result().request.qubit_mapping)
+            try:
+                print(job.result().results[0].metadata['input_qubit_map'])
+            except AttributeError:
+                print(job.result().request.qubit_mapping)
 
-        t2 = ((counts["00"] + counts["11"]) / shots) * 100
 
-        counts_00 = (counts["00"] / shots) * 100
-        counts_11 = (counts["11"] / shots) * 100
+
+        t2 = ((counts.get("00", 0) + counts.get("11", 0)) / shots) * 100
+
+        counts_00 = (counts.get("00", 0) / shots) * 100
+        counts_11 = (counts.get("11", 0) / shots) * 100
 
         if "10" in counts:
             counts_10 = (counts["10"] / shots) * 100
@@ -122,13 +136,13 @@ def main():
             counts_01 = (counts["01"] / shots) * 100
         else:
             counts_01 = 0
-        print(offset2 + " Percentage counts |00> = ", round(counts_00, 2), "%")
-        print(offset2 + " Percentage counts |11> = ", round(counts_11, 2), "%")
-        print(offset2 + " Percentage counts |10> = ", round(counts_10, 2), "%")
-        print(offset2 + " Percentage counts |01> = ", round(counts_01, 2), "%")
-        print(offset2 + " Percentage of counts |00> or |11> = ", round(t2, 2), "%")
+        print("Percentage counts |00> = ", round(counts_00, 2), "%")
+        print("Percentage counts |11> = ", round(counts_11, 2), "%")
+        print("Percentage counts |10> = ", round(counts_10, 2), "%")
+        print("Percentage counts |01> = ", round(counts_01, 2), "%")
+        print("Percentage of counts |00> or |11> = ", round(t2, 2), "%")
 
-        print(offset + "Control: QB3" + "  Target QB" + str(qb + 1) + " -> ")
+        print_header("Control: QB3" + "  Target QB" + str(qb + 1) + " -> ")
         qreg = QuantumRegister(2, "qB")
         qc = QuantumCircuit(qreg)
 
@@ -146,18 +160,25 @@ def main():
             qreg[1]: 2,
         }
 
-        job = execute(qc, backend, shots=shots, initial_layout=qubit_mapping)
+        qc = transpile(qc, backend, optimization_level=0, initial_layout=qubit_mapping)
+        
+        if args.verbose:
+            print(qc.draw())
+
+        job = backend.run(qc, shots=shots)
 
         counts = job.result().get_counts()
 
         if args.verbose and "IQM" in str(backend):
             print("Mapping")
-            print(job.result().request.qubit_mapping)
+            try:
+                print(job.result().results[0].metadata['input_qubit_map'])
+            except AttributeError:
+                print(job.result().request.qubit_mapping)
+        t2 = ((counts.get("00", 0) + counts.get("11", 0)) / shots) * 100
 
-        t2 = ((counts["00"] + counts["11"]) / shots) * 100
-
-        counts_00 = (counts["00"] / shots) * 100
-        counts_11 = (counts["11"] / shots) * 100
+        counts_00 = (counts.get("00", 0) / shots) * 100
+        counts_11 = (counts.get("11", 0) / shots) * 100
 
         if "10" in counts:
             counts_10 = (counts["10"] / shots) * 100
@@ -168,11 +189,11 @@ def main():
             counts_01 = (counts["01"] / shots) * 100
         else:
             counts_01 = 0
-        print(offset2 + " Percentage counts |00> = ", round(counts_00, 2), "%")
-        print(offset2 + " Percentage counts |11> = ", round(counts_11, 2), "%")
-        print(offset2 + " Percentage counts |10> = ", round(counts_10, 2), "%")
-        print(offset2 + " Percentage counts |01> = ", round(counts_01, 2), "%")
-        print(offset2 + " Percentage of counts |00> or |11> = ", round(t2, 2), "%")
+        print("Percentage counts |00> = ", round(counts_00, 2), "%")
+        print("Percentage counts |11> = ", round(counts_11, 2), "%")
+        print("Percentage counts |10> = ", round(counts_10, 2), "%")
+        print("Percentage counts |01> = ", round(counts_01, 2), "%")
+        print("Percentage of counts |00> or |11> = ", round(t2, 2), "%")
 
 
 if __name__ == "__main__":

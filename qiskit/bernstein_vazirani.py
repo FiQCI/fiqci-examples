@@ -5,8 +5,9 @@ from collections import Counter
 from random import randint
 
 from iqm.qiskit_iqm import IQMProvider
-from qiskit_aer import Aer, ClassicalRegister, QuantumCircuit, QuantumRegister, execute, transpile
-
+from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
+from qiskit_aer import Aer
 """
 
 This example shows the Bernstein-Vazirani Algorithm.
@@ -25,10 +26,6 @@ This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence o
 of size 4 despite having a quantum register of size 5.
 
 """
-offset = " " * 37
-offset_2 = " " * 10
-offset_3 = " " * 50
-
 
 class BVoracle:
     """
@@ -58,10 +55,9 @@ class BVoracle:
         qreg = QuantumRegister(5, "QB")
         creg = ClassicalRegister(4, "c")
         qc = QuantumCircuit(qreg, creg)
-
         qc = self._prepare_circuit(qc, qreg)
 
-        job = execute(qc, self.backend, shots=shots)
+        job = self.backend.run(qc, shots=shots)
 
         return job.result().get_counts()
 
@@ -73,7 +69,7 @@ class BVoracle:
             qc.h(i)
 
         s = self._to_bin_digits(self._num)[::-1]
-
+        print(self._num, s)
         for q in range(4):
             if s[q] != 0:
                 qc.cx(q, qreg[4])
@@ -82,14 +78,14 @@ class BVoracle:
             qc.h(i)
 
         qc.measure(range(4), range(4))
+        transpiled_circuit = transpile(qc, self.backend, layout_method='sabre', optimization_level=3)
         if self.verbose:
             print("Created circuit: ")
             print(qc.draw())
-            transpiled_circuit = transpile(qc, self.backend)
             print("Transpiled circuit: ")
             print(transpiled_circuit.draw())
 
-        return qc
+        return transpiled_circuit
 
     def _to_bin_digits(self, num, dim=4):
         """
@@ -193,13 +189,11 @@ def get_args():
 #         b += str(bv.get(x))
 #     return b[::-1]
 
-
 def print_header(s):
     """
     Prints a section header.
     """
-    print("\n" + " " * 50 + f"=== {s.upper()} ===")
-
+    print("\n" + f"=== {s.upper()} ===")
 
 def most_frequent(lst):
     """
@@ -209,18 +203,26 @@ def most_frequent(lst):
     most_freq_item = max(freqs, key=freqs.get)
     return most_freq_item, freqs[most_freq_item]
 
+def secret_count(lst, secret):
+    """
+    Returns the number of times the secret number appears in the list.
+    """
+    return lst.get(f"{secret:0{4}b}", 0)
+
 
 def main():
     args = get_args()
-
+    backend = IQMFakeAdonis()
     if args.backend == 'helmi':
+        # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError(
-                "Environment variable HELMI_CORTEX_URL is not set",
-            )
-        provider = IQMProvider(HELMI_CORTEX_URL)
-        backend = provider.get_backend()
+            print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
+            #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+
+        else:
+            provider = IQMProvider(HELMI_CORTEX_URL)
+            backend = provider.get_backend()
     else:
         provider = Aer
         backend = provider.get_backend('aer_simulator')
@@ -236,39 +238,34 @@ def main():
     NUM = args.number
     if NUM is None:
         NUM = randint(0, 15)
-        print(
-            offset
-            + "The hidden oracle number was chosen randomly and will not be disclosed.",
-        )
+        print("The hidden oracle number was chosen randomly and will not be disclosed.")
     else:
-        print(
-            offset
-            + f"The hidden oracle number is s = {
+        print(f"""The hidden oracle number is s = {
                 NUM
-            }. In general it is not dislosed to the testing party.",
-        )
+            }. In general it is not dislosed to the testing party.""")
 
     bv = BVoracle(num=NUM, backend=backend, verbose=args.verbose)
-    print(offset + "The oracle is now initialized with given secret oracle index.")
+    print("The oracle is now initialized with given secret oracle index.")
 
     if args.option == 1:
         guess = bv.quantum(shots=10000)
         s, amt = most_frequent(guess)
-        success_rate = round((amt / 1000) * 100, 2)
+        if bv._num != int(s, 2):
+            success_rate = secret_count(guess, bv._num)
+        else:
+            success_rate = round((amt / 1000) * 100, 2)
         print(s, amt)
 
         print_header("Single run")
-        print(offset + f"Success Chance: {success_rate}%")
-        print(offset + f"Result: {int(s, 2)}")
-        print(offset + f"Binary: {s}")
+        print(f"Success Chance: {success_rate}%")
+        print(f"Result: {int(s, 2)}")
+        print(f"Binary: {s}")
+        print(f"Secret number: {bv._num}")
 
-        print(
-            offset
-            + f"Guessed outcome is s = {int(s, 2)} (binary number {s}) found in {
+        print(f"""Guessed outcome is s = {int(s, 2)} (binary number {s}) found in {
                 amt
-            } shots out of 1 repeats.",
-        )
-        print(offset + f"Quantum oracle was called {bv.qcalls} time(s).")
+            } shots out of 1 repeats.""")
+        print(f"Quantum oracle was called {bv.qcalls} time(s).")
         print("\n")
 
     elif args.option == 2:
@@ -280,23 +277,27 @@ def main():
         for i in range(args.repeats):
             guess = bv.quantum(shots=1000)
             s, amt = most_frequent(guess)
-            success_rate = round((amt / 1000) * 100, 2)
+            if bv._num != int(s, 2):
+                success_rate = secret_count(guess, bv._num)
+            else:
+                success_rate = round((amt / 1000) * 100, 2)
             success.append(success_rate)
             result.append(int(s, 2))
             binary.append(s)
             qcalls.append(bv.qcalls)
 
-        print(offset + "Run  Success      Result     Binary     qcalls")
+        print("Run  Success      Result     Binary     Secret     qcalls")
         for i in range(args.repeats):
             print(
-                offset
-                + str(i + 1)
+                str(i + 1)
                 + "     "
                 + str(success[i])
                 + "%         "
                 + str(result[i])
                 + "         "
                 + str(binary[i])
+                + "         "
+                + str(bv._num)
                 + "         "
                 + str(qcalls[i])
                 + "",

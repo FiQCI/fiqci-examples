@@ -44,7 +44,7 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
 
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 if not HELMI_CORTEX_URL:
-    raise ValueError('Environment variable HELMI_CORTEX_URL is not set')
+    raise ValueError('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?')
 
 # Using Qiskit as an example of how to query using this function.
 

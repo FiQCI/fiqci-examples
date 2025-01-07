@@ -1,6 +1,9 @@
 """
 Two qubit Bell state combinations examples.
 Kindly contributed by JLenssen
+
+Generate all 8 possible Bell States on the 5-qubit star layout.
+Draw an image comparing error rates between all states.
 """
 import collections
 import os
@@ -11,7 +14,9 @@ from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
 from iqm.qiskit_iqm import IQMProvider
-from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
+from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
+from qiskit import QuantumCircuit, QuantumRegister, transpile
+from qiskit_aer import AerSimulator
 
 SIMULATE = False
 SHOTS = 1000
@@ -37,16 +42,21 @@ circuit.cx(qreg[0], qreg[1])
 circuit.measure_all()
 print(circuit)
 
+backend = IQMFakeAdonis()
+
 if SIMULATE:
-    backend = Aer.get_backend('aer_simulator')
+    backend = AerSimulator()
 else:
     HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
     if not HELMI_CORTEX_URL:
-        raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
-    provider = IQMProvider(HELMI_CORTEX_URL)
-    backend = provider.get_backend()
+        print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
+        #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
+    else:
+        provider = IQMProvider(HELMI_CORTEX_URL)
+        backend = provider.get_backend()
 
+print(qubit_combinations)
 for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
 
     start_time = time.time()
@@ -54,7 +64,8 @@ for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
         qreg[0]: qubit_a,
         qreg[1]: qubit_b,
     }
-    job = execute(circuit, backend, shots=SHOTS, initial_layout=qubit_mapping)
+    tr_circuit = transpile(circuit, backend, optimization_level=0, initial_layout=qubit_mapping)
+    job = backend.run(tr_circuit, shots=SHOTS)
     counts = job.result().get_counts()
     end_time = time.time() - start_time
 
@@ -74,9 +85,9 @@ for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
 now = datetime.now()
 formatted_date = now.strftime("%d.%m.%Y")
 plt.suptitle(
-    f"Bell State experiment ($\\frac{{1}}{{\\sqrt{{2}}}} |00\\rangle + |11\\rangle$) - {
+    f"""Bell State experiment ($\\frac{{1}}{{\\sqrt{{2}}}} |00\\rangle + |11\\rangle$) - {
         formatted_date
-    }",
+    }""",
 )
 plt.tight_layout()
 plt.savefig('test.png', dpi=200)
