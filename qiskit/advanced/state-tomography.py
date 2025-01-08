@@ -16,13 +16,12 @@ more infot on the StateTomography experiment can be found here: https://github.c
 
 import os
 
-from qiskit_experiments.library import StateTomography
 from iqm.qiskit_iqm import IQMProvider
 from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
+from qiskit_experiments.library import StateTomography
 
 from qiskit import QuantumCircuit
 from qiskit.visualization import plot_state_city
-
 
 backend = IQMFakeAdonis()
 
@@ -30,7 +29,7 @@ backend = IQMFakeAdonis()
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 if not HELMI_CORTEX_URL:
     print("Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
-    #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
 else:
     provider = IQMProvider(HELMI_CORTEX_URL)
@@ -58,4 +57,7 @@ print(jobs[0].status())
 
 state_result = tomography_data.analysis_results("state")
 print(state_result)
-plot_state_city(state_result.value, title="Density Matrix", filename="density_matrix.png")
+plot_state_city(
+    state_result.value, title="Density Matrix",
+    filename="density_matrix.png",
+)

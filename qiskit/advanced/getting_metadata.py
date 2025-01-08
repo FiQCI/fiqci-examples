@@ -14,7 +14,7 @@ backend = IQMFakeAdonis()
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 if not HELMI_CORTEX_URL:
     print("Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
-    #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
 else:
     provider = IQMProvider(HELMI_CORTEX_URL)
@@ -57,12 +57,19 @@ exp_result = result._get_experiment(circuit)
 print("Job ID: ", job.job_id(), end="\n")  # Retrieving the submitted job id
 
 try:
-    print("Circuits: ", job._circuits[0], end="\n")  # Retrieving the circuit request sent
-    print("Mapping: ", job.result().results[0].metadata['input_qubit_map'], end="\n")
+    # Retrieving the circuit request sent
+    print("Circuits: ", job._circuits[0], end="\n")
+    print(
+        "Mapping: ", job.result(
+        ).results[0].metadata['input_qubit_map'], end="\n",
+    )
 except AttributeError:
     print("Circuits: ", result.request.circuits, end="\n")
     print("Calibration Set ID: ", exp_result.calibration_set_id, end="\n")
-    print("Mapping: ", job.result().request.qubit_mapping, end="\n")  # Retrieving the qubit mapping
+    print(
+        "Mapping: ", job.result().request.qubit_mapping,
+        end="\n",
+    )  # Retrieving the qubit mapping
 # Retrieving the number of requested shots.
 print("Shots: ", result.results[0].shots, end="\n")
 
