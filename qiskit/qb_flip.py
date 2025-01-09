@@ -6,7 +6,10 @@ import os
 from argparse import RawTextHelpFormatter
 
 from iqm.qiskit_iqm import IQMProvider
-from qiskit_aer import Aer, QuantumCircuit, QuantumRegister, execute
+from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
+from qiskit_aer import Aer
+
+from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 
 def get_args():
@@ -67,18 +70,25 @@ def single_flip_circuit(qubit: int) -> tuple[QuantumCircuit, dict]:
     return qc, mapping
 
 
-def flip_qubits(qubits: list[int], backend: str, shots: int, verbose: bool):
+def flip_qubits(qubits: list[int], backend_str: str, shots: int, verbose: bool):
     """
     Function to run the flip circuit
     """
-    if backend == 'helmi':
+
+    backend = IQMFakeAdonis()
+
+    if backend_str == 'helmi':
+        # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            raise ValueError(
-                "Environment variable HELMI_CORTEX_URL is not set",
-            )
-        provider = IQMProvider(HELMI_CORTEX_URL)
-        backend = provider.get_backend()
+            print("""Environment variable HELMI_CORTEX_URL is not set.
+                  Are you running on Lumi and on the q_fiqci node?
+                  Falling back to a simulator.""")
+            # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+
+        else:
+            provider = IQMProvider(HELMI_CORTEX_URL)
+            backend = provider.get_backend()
     else:
         provider = Aer
         backend = provider.get_backend('aer_simulator')
@@ -100,12 +110,18 @@ def flip_qubits(qubits: list[int], backend: str, shots: int, verbose: bool):
             print(f"Circuit {i+1}:\n")
             print(circuit)
 
-        job = execute(circuit, backend, shots=shots, initial_layout=mapping)
+        circuit = transpile(
+            circuit, backend, layout_method='sabre',
+            optimization_level=3, initial_layout=mapping,
+        )
+        job = backend.run(circuit, shots=shots)
         counts = job.result().get_counts()
-
         if verbose and "IQM" in str(backend):
             print("Mapping")
-            print(job.result().request.qubit_mapping)
+            try:
+                print(job.result().results[0].metadata['input_qubit_map'])
+            except AttributeError:
+                print(job.result().request.qubit_mapping)
 
         if qubits is None:
             success_probability = calculate_success_probability(

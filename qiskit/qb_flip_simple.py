@@ -4,8 +4,9 @@ Simple qubit flipping example
 import os
 
 from iqm.qiskit_iqm import IQMProvider
+from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
 
-from qiskit import QuantumCircuit, QuantumRegister, execute
+from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 
 def single_flip_circuit(qubit: int) -> tuple[QuantumCircuit, dict]:
@@ -45,38 +46,47 @@ def calculate_success_probability(counts: dict, shots: int, desired_state: str) 
 
 def main():
 
+    backend = IQMFakeAdonis()
     HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
     if not HELMI_CORTEX_URL:
-        raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
-    provider = IQMProvider(HELMI_CORTEX_URL)
-    backend = provider.get_backend()
+        print("""Environment variable HELMI_CORTEX_URL is not set.
+              Are you running on Lumi and on the q_fiqci node?.
+              Falling back to fake backend.""")
+        # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+
+    else:
+        provider = IQMProvider(HELMI_CORTEX_URL)
+        backend = provider.get_backend()
 
     shots = 1000
 
     print("\nFlip one qubit at a time\n")
     for qb in range(5):
         circuit, mapping = single_flip_circuit(qb)
-        job = execute(circuit, backend, shots=shots, initial_layout=mapping)
-        # assert that the mapping is correct
-        assert 'QB' + \
-            str(qb+1) == job.result().request.qubit_mapping[0].physical_name
+        circuit = transpile(
+            circuit, backend, layout_method='sabre',
+            optimization_level=3, initial_layout=mapping,
+        )
+        job = backend.run(circuit, shots=shots)
         counts = job.result().get_counts()
         success_probability = calculate_success_probability(counts, shots, '1')
         print(
-            f"QB{
+            f"""QB{
                 qb + 1
-            } -> {counts}, Success probability: {success_probability * 100:.2f}%",
+            } -> {counts}, Success probability: {success_probability * 100:.2f}%""",
         )
 
     print("\nFlip all qubits at once\n")
     circuit, mapping = flip_circuit([0, 1, 2, 3, 4])
-    job = execute(circuit, backend, shots=shots, initial_layout=mapping)
+    circuit = transpile(
+        circuit, backend, layout_method='sabre',
+        optimization_level=3, initial_layout=mapping,
+    )
+    job = backend.run(circuit, shots=shots)
     counts = job.result().get_counts()
     success_probability = calculate_success_probability(counts, shots, '11111')
     print(
-        f"Counts: {counts}, \nSuccess probability: {
-            success_probability * 100:.2f
-        }%",
+        f"Counts: {counts}, \nSuccess probability: {success_probability * 100:.2f}%",
     )
 
 
