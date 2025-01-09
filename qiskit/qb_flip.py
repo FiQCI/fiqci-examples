@@ -12,9 +12,6 @@ from qiskit_aer import Aer
 from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 
-from qiskit import QuantumCircuit, QuantumRegister, transpile
-
-
 def get_args():
     parser = argparse.ArgumentParser(
         description="Qubit flipping options", formatter_class=RawTextHelpFormatter,
