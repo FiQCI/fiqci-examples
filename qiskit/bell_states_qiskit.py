@@ -7,6 +7,7 @@ from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
 from qiskit_aer import Aer
 
 from qiskit import QuantumCircuit, QuantumRegister, transpile
+
 """
 Create and measure a bell state. User lists the pairs to entangle.
 
