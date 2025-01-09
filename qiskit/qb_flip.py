@@ -7,8 +7,10 @@ from argparse import RawTextHelpFormatter
 
 from iqm.qiskit_iqm import IQMProvider
 from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
-from qiskit import QuantumCircuit, QuantumRegister, transpile
 from qiskit_aer import Aer
+
+from qiskit import QuantumCircuit, QuantumRegister, transpile
+
 
 def get_args():
     parser = argparse.ArgumentParser(
@@ -79,8 +81,10 @@ def flip_qubits(qubits: list[int], backend_str: str, shots: int, verbose: bool):
         # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            print("Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
-            #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            print("""Environment variable HELMI_CORTEX_URL is not set.
+                  Are you running on Lumi and on the q_fiqci node?
+                  Falling back to a simulator.""")
+            # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
         else:
             provider = IQMProvider(HELMI_CORTEX_URL)
@@ -106,7 +110,10 @@ def flip_qubits(qubits: list[int], backend_str: str, shots: int, verbose: bool):
             print(f"Circuit {i+1}:\n")
             print(circuit)
 
-        circuit = transpile(circuit, backend, layout_method='sabre', optimization_level=3, initial_layout=mapping)
+        circuit = transpile(
+            circuit, backend, layout_method='sabre',
+            optimization_level=3, initial_layout=mapping,
+        )
         job = backend.run(circuit, shots=shots)
         counts = job.result().get_counts()
         if verbose and "IQM" in str(backend):

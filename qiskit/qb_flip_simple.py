@@ -49,8 +49,10 @@ def main():
     backend = IQMFakeAdonis()
     HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
     if not HELMI_CORTEX_URL:
-        print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
-        #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        print("""Environment variable HELMI_CORTEX_URL is not set.
+              Are you running on Lumi and on the q_fiqci node?.
+              Falling back to fake backend.""")
+        # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
     else:
         provider = IQMProvider(HELMI_CORTEX_URL)
@@ -61,7 +63,10 @@ def main():
     print("\nFlip one qubit at a time\n")
     for qb in range(5):
         circuit, mapping = single_flip_circuit(qb)
-        circuit = transpile(circuit, backend, layout_method='sabre', optimization_level=3, initial_layout=mapping)
+        circuit = transpile(
+            circuit, backend, layout_method='sabre',
+            optimization_level=3, initial_layout=mapping,
+        )
         job = backend.run(circuit, shots=shots)
         counts = job.result().get_counts()
         success_probability = calculate_success_probability(counts, shots, '1')
@@ -73,7 +78,10 @@ def main():
 
     print("\nFlip all qubits at once\n")
     circuit, mapping = flip_circuit([0, 1, 2, 3, 4])
-    circuit = transpile(circuit, backend, layout_method='sabre', optimization_level=3, initial_layout=mapping)
+    circuit = transpile(
+        circuit, backend, layout_method='sabre',
+        optimization_level=3, initial_layout=mapping,
+    )
     job = backend.run(circuit, shots=shots)
     counts = job.result().get_counts()
     success_probability = calculate_success_probability(counts, shots, '11111')

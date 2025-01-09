@@ -21,13 +21,17 @@ circuit.measure_all()
 backend = IQMFakeAdonis()
 HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
 if not HELMI_CORTEX_URL:
-    print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
-    #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    print("""Environment variable HELMI_CORTEX_URL is not set.
+          Are you running on Lumi and on the q_fiqci node?.
+          Falling back to fake backend.""")
+    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
 else:
     provider = IQMProvider(HELMI_CORTEX_URL)
     backend = provider.get_backend()
-    circuit = transpile(circuit, backend, layout_method='sabre', optimization_level=3)
+    circuit = transpile(
+        circuit, backend, layout_method='sabre', optimization_level=3,
+    )
 
 # Retrieving backend information
 # print(f'Native operations: {backend.operation_names}')
@@ -46,7 +50,7 @@ try:
 except AttributeError:
     print(job.result().request.qubit_mapping)
 """
-#print(result.results[0].shots)
+# print(result.results[0].shots)
 
 counts = result.get_counts()
 print(counts)

@@ -15,8 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from iqm.qiskit_iqm import IQMProvider
 from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
-from qiskit import QuantumCircuit, QuantumRegister, transpile
 from qiskit_aer import AerSimulator
+
+from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 SIMULATE = False
 SHOTS = 1000
@@ -49,8 +50,10 @@ if SIMULATE:
 else:
     HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
     if not HELMI_CORTEX_URL:
-        print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
-        #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        print("""Environment variable HELMI_CORTEX_URL is not set.
+              Are you running on Lumi and on the q_fiqci node?.
+              Falling back to fake backend.""")
+        # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
     else:
         provider = IQMProvider(HELMI_CORTEX_URL)
@@ -64,7 +67,9 @@ for idx, (qubit_a, qubit_b) in enumerate(qubit_combinations):
         qreg[0]: qubit_a,
         qreg[1]: qubit_b,
     }
-    tr_circuit = transpile(circuit, backend, optimization_level=0, initial_layout=qubit_mapping)
+    tr_circuit = transpile(
+        circuit, backend, optimization_level=0, initial_layout=qubit_mapping,
+    )
     job = backend.run(tr_circuit, shots=SHOTS)
     counts = job.result().get_counts()
     end_time = time.time() - start_time

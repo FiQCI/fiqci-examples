@@ -6,8 +6,10 @@ from random import randint
 
 from iqm.qiskit_iqm import IQMProvider
 from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
-from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
 from qiskit_aer import Aer
+
+from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, transpile
+
 """
 
 This example shows the Bernstein-Vazirani Algorithm.
@@ -26,6 +28,7 @@ This is a 5 qubit circuit with the last qubit used as an "output qubit". Hence o
 of size 4 despite having a quantum register of size 5.
 
 """
+
 
 class BVoracle:
     """
@@ -78,7 +81,9 @@ class BVoracle:
             qc.h(i)
 
         qc.measure(range(4), range(4))
-        transpiled_circuit = transpile(qc, self.backend, layout_method='sabre', optimization_level=3)
+        transpiled_circuit = transpile(
+            qc, self.backend, layout_method='sabre', optimization_level=3,
+        )
         if self.verbose:
             print("Created circuit: ")
             print(qc.draw())
@@ -195,6 +200,7 @@ def print_header(s):
     """
     print("\n" + f"=== {s.upper()} ===")
 
+
 def most_frequent(lst):
     """
     Returns the most frequent item in a list.
@@ -202,6 +208,7 @@ def most_frequent(lst):
     freqs = Counter(lst)
     most_freq_item = max(freqs, key=freqs.get)
     return most_freq_item, freqs[most_freq_item]
+
 
 def secret_count(lst, secret):
     """
@@ -217,8 +224,10 @@ def main():
         # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
-            #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            print("""Environment variable HELMI_CORTEX_URL is not set.
+                  Are you running on Lumi and on the q_fiqci node?.
+                  Falling back to fake backend.""")
+            # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
         else:
             provider = IQMProvider(HELMI_CORTEX_URL)

@@ -4,8 +4,9 @@ from argparse import RawTextHelpFormatter
 
 from iqm.qiskit_iqm import IQMProvider
 from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
-from qiskit import QuantumCircuit, QuantumRegister, transpile
 from qiskit_aer import Aer
+
+from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 """
 Create and measure a bell state. User lists the pairs to entangle.
@@ -17,11 +18,13 @@ Compare simulator vs real devices. CNOT gate on different target/control qubits 
 
 """
 
+
 def print_header(s):
     """
     Prints a section header.
     """
     print("\n" + f"=== {s.upper()} ===")
+
 
 def get_args():
 
@@ -72,8 +75,10 @@ def main():
         # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
-            #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            print("""Environment variable HELMI_CORTEX_URL is not set.
+                  Are you running on Lumi and on the q_fiqci node?.
+                  Falling back to fake backend.""")
+            # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
         else:
             provider = IQMProvider(HELMI_CORTEX_URL)
@@ -104,7 +109,10 @@ def main():
             qreg[1]: 2,
         }
 
-        qc = transpile(qc, backend, optimization_level=0, initial_layout=qubit_mapping)
+        qc = transpile(
+            qc, backend, optimization_level=0,
+            initial_layout=qubit_mapping,
+        )
 
         if args.verbose:
             print(qc.draw())
@@ -119,8 +127,6 @@ def main():
                 print(job.result().results[0].metadata['input_qubit_map'])
             except AttributeError:
                 print(job.result().request.qubit_mapping)
-
-
 
         t2 = ((counts.get("00", 0) + counts.get("11", 0)) / shots) * 100
 
@@ -160,8 +166,11 @@ def main():
             qreg[1]: 2,
         }
 
-        qc = transpile(qc, backend, optimization_level=0, initial_layout=qubit_mapping)
-        
+        qc = transpile(
+            qc, backend, optimization_level=0,
+            initial_layout=qubit_mapping,
+        )
+
         if args.verbose:
             print(qc.draw())
 

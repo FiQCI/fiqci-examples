@@ -5,8 +5,9 @@ from argparse import RawTextHelpFormatter
 import numpy as np
 from iqm.qiskit_iqm import IQMProvider
 from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
-from qiskit import QuantumCircuit, QuantumRegister, transpile
 from qiskit_aer import Aer
+
+from qiskit import QuantumCircuit, QuantumRegister, transpile
 
 """
 
@@ -28,11 +29,14 @@ and then the 5 qubit GHZ state
     or Kolmogorov distance
     It is another measure of the distinguishability between two quantum states
 """
+
+
 def print_header(s):
     """
     Prints a section header.
     """
     print("\n" + f"=== {s.upper()} ===")
+
 
 def get_args():
 
@@ -81,8 +85,10 @@ def main():
         # Set up the Helmi backend
         HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
         if not HELMI_CORTEX_URL:
-            print('Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi and on the q_fiqci node?. Falling back to fake backend.')
-            #raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            print("""Environment variable HELMI_CORTEX_URL is not set.
+                  Are you running on Lumi and on the q_fiqci node?.
+                  Falling back to fake backend.""")
+            # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
 
         else:
             provider = IQMProvider(HELMI_CORTEX_URL)
@@ -91,12 +97,11 @@ def main():
         provider = Aer
         backend = provider.get_backend('aer_simulator')
 
-
     shots = 10000
 
     bell_vd = []
     id_dist = [0.5, 0, 0, 0.5]
-    
+
     print_header("Preparing a Bell State")
     count = 0
     for qb in [0, 1, 3, 4]:
@@ -119,7 +124,9 @@ def main():
         }   # map second virtual qubit to QB3
 
         # Run job on the circuit
-        circuit = transpile(circuit, backend, optimization_level=0, initial_layout=mapping)
+        circuit = transpile(
+            circuit, backend, optimization_level=0, initial_layout=mapping,
+        )
         job = backend.run(circuit, shots=shots)
         counts = job.result().get_counts()
 
@@ -167,7 +174,9 @@ def main():
         print(" ")
         print(circuit.draw())
 
-    circuit = transpile(circuit, backend, layout_method="sabre", optimization_level=3)
+    circuit = transpile(
+        circuit, backend, layout_method="sabre", optimization_level=3,
+    )
     job = backend.run(circuit, shots=shots)
     counts = job.result().get_counts()
 
