@@ -8,7 +8,6 @@ from iqm.qiskit_iqm.fake_backends import IQMFakeAdonis
 from qiskit_aer import Aer
 
 from qiskit import QuantumCircuit, QuantumRegister, transpile
-
 """
 
 This example creates a 5 qubit GHZ state in qiskit
