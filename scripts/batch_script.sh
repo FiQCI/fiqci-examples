@@ -15,7 +15,7 @@ module load fiqci-vtt-qiskit  # Load the module to use qiskit on Helmi
 
 # module load fiqci-vtt-cirq    # Load the module to use cirq on Helmi
 
-export DEVICES=("Q5") # for Q50 use export DEVICES=("Q50") 
+export DEVICES=("Q5") # for Q50 use export DEVICES=("Q50")
                       # for both Q5 and Q50 use export DEVICES=("Q5" "Q50")
 
 source $RUN_SETUP
