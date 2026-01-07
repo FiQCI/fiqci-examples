@@ -1,4 +1,5 @@
 import json
+import os
 
 import requests
 from iqm.iqm_client import IQMClient  # Requires iqm_client==15.3
@@ -38,13 +39,16 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
     return data
 
 
+Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+if not Q50_CORTEX_URL:
+    raise ValueError('Environment variable Q50_CORTEX_URL is not set')
+
 # Using Qiskit as an example of how to query using this function.
 
-iqm_server_url = "https://<IQM SERVER>"  # Replace this with the correct URL
-quantum_computer = "<NAME>"
-provider = IQMProvider(iqm_server_url, quantum_computer=quantum_computer)
+quantum_computer = "q50"
+provider = IQMProvider(Q50_CORTEX_URL, quantum_computer=quantum_computer)
 backend = provider.get_backend()
 
 calibration_data = get_calibration_data(backend.client)
 
-print(calibration_data)
+print(calibration_data['metrics'].keys())
