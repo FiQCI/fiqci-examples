@@ -43,12 +43,8 @@ Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
 if not Q50_CORTEX_URL:
     raise ValueError('Environment variable Q50_CORTEX_URL is not set')
 
-# Using Qiskit as an example of how to query using this function.
-
 quantum_computer = "q50"
 provider = IQMProvider(Q50_CORTEX_URL, quantum_computer=quantum_computer)
 backend = provider.get_backend()
 
 calibration_data = get_calibration_data(backend.client)
-
-print(calibration_data['metrics'].keys())
