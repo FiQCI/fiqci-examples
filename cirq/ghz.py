@@ -3,7 +3,7 @@ import os
 from argparse import RawTextHelpFormatter
 
 import numpy as np
-from iqm.cirq_iqm import Adonis
+from iqm.cirq_iqm import Adonis, Aphrodite
 from iqm.cirq_iqm.iqm_sampler import IQMSampler
 
 import cirq
@@ -18,15 +18,15 @@ def fold_func(x: np.ndarray) -> str:
 
 This example creates a 5 qubit GHZ state in cirq
 
-First a Bell state is prepared between QB3 and all the other qubits.
-From this we can measure the trace distance between QB3 and each of the other qubits.
+First a Bell state is prepared between QB11 and all the neighbouring qubits.
+From this we can measure the trace distance between QB11 and each of the neighbouring qubits.
 
 A 5 qubit GHZ state is then created
 
 
 """
 
-adonis = Adonis()
+adonis = Aphrodite()
 
 
 def get_args():
@@ -42,11 +42,11 @@ def get_args():
         help="""
         Define the backend for running the program.
         'simulator' runs on Cirq's Simulator,
-        'helmi' runs on VTT Helmi Quantum Computer
+        'q50' runs on VTT q50 Quantum Computer
         """,
         required=True,
         type=str,
-        choices=["helmi", "simulator"],
+        choices=["q50", "simulator"],
     )
 
     args_parser.add_argument(
@@ -69,17 +69,21 @@ def main():
 
     args = get_args()
 
-    if args.backend == 'helmi':
-        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-        if not HELMI_CORTEX_URL:
+    if args.backend == 'q50':
+        Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+        if not Q50_CORTEX_URL:
             raise ValueError(
-                "Environment variable HELMI_CORTEX_URL is not set",
+                "Environment variable Q50_CORTEX_URL is not set",
             )
-        sampler = IQMSampler(HELMI_CORTEX_URL)
+        sampler = IQMSampler(Q50_CORTEX_URL)
     else:
         sampler = cirq.Simulator()
 
     shots = 10000
+
+    qubit_numbers = [5, 10, 11, 12, 19]
+    center = 11
+    neighbors = [n for n in qubit_numbers if n != center]
 
     bell_vd = []
     id_dist = [0.5, 0, 0, 0.5]
@@ -90,9 +94,9 @@ def main():
     print(offset + "================================ ")
     print(" ")
     count = 0
-    for qb in [0, 1, 3, 4]:
-        print(offset_2 + "QB" + str(qb + 1) + " and QB3 -> ", end=" ")
-        q = [cirq.NamedQubit(f"QB{j + 1}") for j in [qb, 2]]
+    for qb in neighbors:
+        print(offset_2 + "QB" + str(qb) + " and QB" + str(center) + " -> ", end=" ")
+        q = [cirq.NamedQubit(f"QB{j}") for j in [qb, center]]
         circuit = cirq.Circuit()
 
         circuit.append(cirq.H(q[0]))
@@ -133,12 +137,13 @@ def main():
     id_dist[0] = 0.5
     id_dist[31] = 0.5
 
-    q = [cirq.NamedQubit(f"QB{j + 1}") for j in range(5)]
+    q = [cirq.NamedQubit(f"QB{j}") for j in qubit_numbers]
+    center_q = cirq.NamedQubit(f"QB{center}")
     circuit = cirq.Circuit()
 
-    circuit.append(cirq.H(q[2]))
-    for qb in [0, 1, 3, 4]:
-        circuit.append(cirq.CNOT(q[2], q[qb]))
+    circuit.append(cirq.H(center_q))
+    for qb in neighbors:
+        circuit.append(cirq.CNOT(center_q, cirq.NamedQubit(f"QB{qb}")))
 
     circuit.append(cirq.measure(*q, key="M"))
 
