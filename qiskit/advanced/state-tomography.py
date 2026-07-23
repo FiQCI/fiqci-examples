@@ -1,18 +1,17 @@
 """
-NOTE: This script is using qiskit-iqm 15.6, Qiskit 1.1.2 and qiskit-experiments 0.7.0.
-Using a newer version of qiskit-experiments will result in an error.
-You can install the required version of qiskit-experiments by running:
+NOTE: This script is using qiskit-experiments 0.14.
 
-python -m pip install qiskit-experiments==0.7.0
+On LUMI you can install it after loading the fiqci-vtt-qiskit module with the following command:
+pip install --user qiskit-experiments==0.14
 
-An example of using the Qiskit experiments library on Helmi
+An example of using the Qiskit experiments library on Q50
 
 The StateTomography experiment creates a single job containing several circuits.
 As part of the analysis, the experiment estimates the density matrix of the state based on the results.
 
 Additional details on Qiskit Experiments can be found here: https://qiskit.org/ecosystem/experiments/ and
-more infot on the StateTomography experiment can be found here:
-https://github.com/qiskit-community/qiskit-experiments/blob/0.7.0/docs/manuals/verification/state_tomography.rst
+more info on the StateTomography experiment can be found here:
+https://github.com/qiskit-community/qiskit-experiments/blob/0.14/docs/manuals/verification/state_tomography.rst
 """
 
 import os
@@ -26,14 +25,14 @@ from qiskit.visualization import plot_state_city
 
 backend = IQMFakeAdonis()
 
-# Set up the Helmi backend
-HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-if not HELMI_CORTEX_URL:
-    print("Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
-    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+# Set up the Q50 backend
+Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+if not Q50_CORTEX_URL:
+    print("Environment variable Q50_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
+    # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
 else:
-    provider = IQMProvider(HELMI_CORTEX_URL)
+    provider = IQMProvider(Q50_CORTEX_URL)
     backend = provider.get_backend()
 
 circuit = QuantumCircuit(2, name='Bell pair circuit')
@@ -56,7 +55,9 @@ print(jobs)
 print(jobs[0].status())
 
 
-state_result = tomography_data.analysis_results("state")
+# As of qiskit-experiments 0.9, analysis_results() returns a pandas DataFrame
+# when dataframe=True (the implicit single-result return is deprecated).
+state_result = tomography_data.analysis_results("state", dataframe=True).iloc[0]
 print(state_result)
 plot_state_city(
     state_result.value, title="Density Matrix",

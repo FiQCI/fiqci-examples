@@ -10,14 +10,14 @@ from qiskit import QuantumCircuit, transpile
 
 backend = IQMFakeAdonis()
 
-# Set up the Helmi backend
-HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-if not HELMI_CORTEX_URL:
-    print("Environment variable HELMI_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
-    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+# Set up the Q50 backend
+Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+if not Q50_CORTEX_URL:
+    print("Environment variable Q50_CORTEX_URL is not set. Are you running on Lumi? Falling back to a simulator.")
+    # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
 else:
-    provider = IQMProvider(HELMI_CORTEX_URL)
+    provider = IQMProvider(Q50_CORTEX_URL)
     backend = provider.get_backend()
 
 # Retrieving backend information
