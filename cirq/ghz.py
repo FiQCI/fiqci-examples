@@ -95,7 +95,10 @@ def main():
     print(" ")
     count = 0
     for qb in neighbors:
-        print(offset_2 + "QB" + str(qb) + " and QB" + str(center) + " -> ", end=" ")
+        print(
+            offset_2 + "QB" + str(qb) + " and QB" +
+            str(center) + " -> ", end=" ",
+        )
         q = [cirq.NamedQubit(f"QB{j}") for j in [qb, center]]
         circuit = cirq.Circuit()
 
