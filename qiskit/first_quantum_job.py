@@ -17,17 +17,17 @@ circuit.measure_all()
 # Uncomment if you wish to print the circuit
 # print(circuit.draw())
 
-# Set up the Helmi backend
+# Set up the Q50 backend
 backend = IQMFakeAdonis()
-HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-if not HELMI_CORTEX_URL:
-    print("""Environment variable HELMI_CORTEX_URL is not set.
+Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+if not Q50_CORTEX_URL:
+    print("""Environment variable Q50_CORTEX_URL is not set.
           Are you running on Lumi and on the q_fiqci node?.
           Falling back to fake backend.""")
-    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
 else:
-    provider = IQMProvider(HELMI_CORTEX_URL)
+    provider = IQMProvider(Q50_CORTEX_URL)
     backend = provider.get_backend()
     circuit = transpile(
         circuit, backend, layout_method='sabre', optimization_level=3,

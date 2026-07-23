@@ -58,11 +58,11 @@ def get_args():
         help="""
         Define the backend for running the program.
         'aer'/'simulator' runs on Qiskit's aer simulator,
-        'helmi' runs on VTT Helmi Quantum Computer
+        'q50' runs on VTT Q50 Quantum Computer
         """,
         required=True,
         type=str,
-        choices=["helmi", "simulator"],
+        choices=["q50", "simulator"],
     )
 
     args_parser.add_argument(
@@ -81,17 +81,17 @@ def get_args():
 def main():
     args = get_args()
     backend = IQMFakeAdonis()
-    if args.backend == 'helmi':
-        # Set up the Helmi backend
-        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-        if not HELMI_CORTEX_URL:
-            print("""Environment variable HELMI_CORTEX_URL is not set.
+    if args.backend == 'q50':
+        # Set up the Q50 backend
+        Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+        if not Q50_CORTEX_URL:
+            print("""Environment variable Q50_CORTEX_URL is not set.
                   Are you running on Lumi and on the q_fiqci node?.
                   Falling back to fake backend.""")
-            # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+            # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
         else:
-            provider = IQMProvider(HELMI_CORTEX_URL)
+            provider = IQMProvider(Q50_CORTEX_URL)
             backend = provider.get_backend()
     else:
         provider = Aer
