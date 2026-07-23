@@ -3,7 +3,7 @@ import os
 from argparse import RawTextHelpFormatter
 
 import numpy as np
-from iqm.cirq_iqm import Adonis, Aphrodite
+from iqm.cirq_iqm import Aphrodite
 from iqm.cirq_iqm.iqm_sampler import IQMSampler
 
 import cirq
@@ -26,7 +26,7 @@ A 5 qubit GHZ state is then created
 
 """
 
-adonis = Aphrodite()
+backend = Aphrodite()
 
 
 def get_args():
@@ -104,7 +104,7 @@ def main():
 
         circuit.append(cirq.measure(*q, key="M"))
 
-        decomposed_circuit = adonis.decompose_circuit(circuit)
+        decomposed_circuit = backend.decompose_circuit(circuit)
 
         result = sampler.run(decomposed_circuit, repetitions=shots)
         counts = result.histogram(key='M', fold_func=fold_func)
@@ -147,7 +147,7 @@ def main():
 
     circuit.append(cirq.measure(*q, key="M"))
 
-    decomposed_circuit = adonis.decompose_circuit(circuit)
+    decomposed_circuit = backend.decompose_circuit(circuit)
 
     result = sampler.run(decomposed_circuit, repetitions=shots)
     counts = result.histogram(key='M', fold_func=fold_func)
