@@ -31,47 +31,14 @@ The `qb_flip_simple.py` is a simple version of the `qb_flip.py` code which runs 
 
 ### Bell State Entanglement
 
-The `bell_states_qiskit.py` creates a `|00> + |11> / sqrt(2)` bell state between different qubit pairs and entangling them. This example is a good measure of how different qubit pairs interact and how utilising a devices topology gives better results. Each qubit pair (QB1&QB3 or QB2&QB3) contains one of the outer qubits (QB1, QB2, QB4, QB5) and the inner qubit QB3. The example creates a bell state by placing a hadamard gate on the outer qubit and a CNOT gate between the two qubits with a different control and target qubit each time. The example prints how often the correct bell state is measured and how often the `|00>` and `|11>` states exist, giving a mesure of noise.
-
+The `bell_state.ipynb` notebook demonstrates how to construct and execute a simple bell state circuit on VTT Q50.
 
 ### Bernstein Vazirani
 
 The Bernstein-Vazirani algorithm attempts to solve the problem of finding some secret string that has been encoded by a black-box algorithm. In this example, the quantum version is implemented with a hidden oracle number randomly chosen and not disclosed. The quantum oracle function is created using hadamard and Z gates in a 5 qubit system to successfully find the hidden secret bit string after numerous attempts.
 
 
-This example sends a 5 qubit circuit to Helmi, however the first 4 qubits are used for the algorithm. The 5th qubit here is used as an output qubit. `helmi.routing` is also utilised in this example.
-
-
-### GHZ state
-
-The GHZ example is a 5 qubit alternative to the bell state example. This time a bell state is between between one of the outer qubits and the inner qubit, QB3. The classical fidelity and trace distance is calculated for each qubit pair this time. The GHZ example finally prepares a 5 qubit GHZ state and efficiently maps this for Helmi's topology
-
-```
-           ┌───┐     ┌─┐
-qB_0: ─────┤ X ├─────┤M├──────────────────────
-           └─┬─┘┌───┐└╥┘     ┌─┐
-qB_1: ───────┼──┤ X ├─╫──────┤M├──────────────
-      ┌───┐  │  └─┬─┘ ║      └╥┘        ┌─┐
-qB_2: ┤ H ├──■────■───╫───■───╫───■─────┤M├───
-      └───┘           ║ ┌─┴─┐ ║   │  ┌─┐└╥┘
-qB_3: ────────────────╫─┤ X ├─╫───┼──┤M├─╫────
-                      ║ └───┘ ║ ┌─┴─┐└╥┘ ║ ┌─┐
-qB_4: ────────────────╫───────╫─┤ X ├─╫──╫─┤M├
-                      ║       ║ └───┘ ║  ║ └╥┘
- c: 5/════════════════╩═══════╩═══════╩══╩══╩═
-                      0       1       3  2  4
-
-```
-
-2-Qubit gates are placed on QB3 (Here this is QB_2 due to Qiskit indexing starting from 0) with the target of one of the outer qubits. We can now measure the fidelity and trace distance for this.
-
-- Fidelity is the "closeness" of two quantum states or how distinguishable they are from each other
-    - For example a maximum value of 1 is attained if and only if the two states are identical.
-    - For more detailed explanation have a look at: http://theory.caltech.edu/~preskill/ph219/chap2_15.pdf
-
-- The "Distance from target" or the Trace Distance is the Quantum generalization of the "statistical distance"
-    or Kolmogorov distance.
-    It is another measure of the distinguishability between two quantum states
+This example sends a 5 qubit circuit to the selected device, however the first 4 qubits are used for the algorithm. The 5th qubit here is used as an output qubit.
 
 
 ## Additional examples
