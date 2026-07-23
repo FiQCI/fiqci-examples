@@ -712,6 +712,7 @@ qiskit = [
     { name = "matplotlib" },
     { name = "notebook" },
     { name = "pylatexenc" },
+    { name = "qiskit-aer" },
     { name = "qiskit-experiments" },
 ]
 
@@ -729,6 +730,7 @@ qiskit = [
     { name = "matplotlib", specifier = ">=3.11.1" },
     { name = "notebook", specifier = ">=7.6.1" },
     { name = "pylatexenc", specifier = ">=2.10" },
+    { name = "qiskit-aer", specifier = ">=0.17.2" },
     { name = "qiskit-experiments", specifier = ">=0.14.1" },
 ]
 

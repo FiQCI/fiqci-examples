@@ -18,4 +18,4 @@ module load fiqci-vtt-qiskit
 export DEVICES=("Q50") # available devices: Q50, radiance20
 source $RUN_SETUP
 
-python -u $1
+python -u "$@"

@@ -18,5 +18,6 @@ qiskit = [
     "matplotlib>=3.11.1",
     "notebook>=7.6.1",
     "pylatexenc>=2.10",
+    "qiskit-aer>=0.17.2",
     "qiskit-experiments>=0.14.1",
 ]
