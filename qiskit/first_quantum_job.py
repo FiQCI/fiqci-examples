@@ -27,7 +27,7 @@ if not Q50_CORTEX_URL:
     # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
 else:
-    provider = IQMProvider(Q50_CORTEX_URL)
+    provider = IQMProvider(Q50_CORTEX_URL, quantum_computer="q50")
     backend = provider.get_backend()
     circuit = transpile(
         circuit, backend, layout_method='sabre', optimization_level=3,

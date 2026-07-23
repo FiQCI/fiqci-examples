@@ -81,7 +81,7 @@ def flip_qubits(qubits: list[int], backend: str, shots: int, verbose: bool):
             raise ValueError(
                 "Environment variable Q50_CORTEX_URL is not set",
             )
-        sampler = IQMSampler(Q50_CORTEX_URL)
+        sampler = IQMSampler(Q50_CORTEX_URL, quantum_computer="q50")
     else:
         sampler = cirq.Simulator()
 

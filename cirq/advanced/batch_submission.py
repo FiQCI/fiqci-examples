@@ -8,7 +8,7 @@ from iqm.cirq_iqm.iqm_sampler import IQMSampler
 import cirq
 
 Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
-sampler = IQMSampler(Q50_CORTEX_URL)
+sampler = IQMSampler(Q50_CORTEX_URL, quantum_computer="q50")
 
 # Create a list to store the circuits
 

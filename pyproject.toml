@@ -12,6 +12,7 @@ cirq = [
     "matplotlib>=3.11.1",
     "notebook>=7.6.1",
     "pylatexenc>=2.10",
+    "sympy>=1.14.0",
 ]
 qiskit = [
     "iqm-client[qiskit]==34",

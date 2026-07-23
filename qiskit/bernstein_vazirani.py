@@ -230,7 +230,7 @@ def main():
             # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
         else:
-            provider = IQMProvider(Q50_CORTEX_URL)
+            provider = IQMProvider(Q50_CORTEX_URL, quantum_computer="q50")
             backend = provider.get_backend()
     else:
         provider = Aer
