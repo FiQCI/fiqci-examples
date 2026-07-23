@@ -57,7 +57,9 @@ print(jobs[0].status())
 
 # As of qiskit-experiments 0.9, analysis_results() returns a pandas DataFrame
 # when dataframe=True (the implicit single-result return is deprecated).
-state_result = tomography_data.analysis_results("state", dataframe=True).iloc[0]
+state_result = tomography_data.analysis_results(
+    "state", dataframe=True,
+).iloc[0]
 print(state_result)
 plot_state_city(
     state_result.value, title="Density Matrix",
