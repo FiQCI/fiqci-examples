@@ -8,14 +8,14 @@ dependencies = []
 
 [dependency-groups]
 cirq = [
-    "iqm-client[cirq]==34",
+    "iqm-client[cirq]>=34.0.0, <35.0.0",
     "matplotlib>=3.11.1",
     "notebook>=7.6.1",
     "pylatexenc>=2.10",
     "sympy>=1.14.0",
 ]
 qiskit = [
-    "iqm-client[qiskit]==34",
+    "iqm-client[qiskit]>=34.0.0, <35.0.0",
     "matplotlib>=3.11.1",
     "notebook>=7.6.1",
     "pylatexenc>=2.10",

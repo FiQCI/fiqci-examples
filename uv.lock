@@ -721,14 +721,14 @@ qiskit = [
 
 [package.metadata.requires-dev]
 cirq = [
-    { name = "iqm-client", extras = ["cirq"], specifier = "==34" },
+    { name = "iqm-client", extras = ["cirq"], specifier = ">=34.0.0,<35.0.0" },
     { name = "matplotlib", specifier = ">=3.11.1" },
     { name = "notebook", specifier = ">=7.6.1" },
     { name = "pylatexenc", specifier = ">=2.10" },
     { name = "sympy", specifier = ">=1.14.0" },
 ]
 qiskit = [
-    { name = "iqm-client", extras = ["qiskit"], specifier = "==34" },
+    { name = "iqm-client", extras = ["qiskit"], specifier = ">=34.0.0,<35.0.0" },
     { name = "matplotlib", specifier = ">=3.11.1" },
     { name = "notebook", specifier = ">=7.6.1" },
     { name = "pylatexenc", specifier = ">=2.10" },
