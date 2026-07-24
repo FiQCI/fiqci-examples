@@ -82,7 +82,7 @@ def flip_qubits(qubits: list[int], backend_str: str, shots: int, verbose: bool):
         Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
         if not Q50_CORTEX_URL:
             print("""Environment variable Q50_CORTEX_URL is not set.
-                  Are you running on Lumi and on the q_fiqci node?
+                  Are you running on Lumi and have exported the correct device?
                   Falling back to a simulator.""")
             # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 

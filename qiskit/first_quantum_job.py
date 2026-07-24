@@ -22,16 +22,17 @@ backend = IQMFakeAdonis()
 Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
 if not Q50_CORTEX_URL:
     print("""Environment variable Q50_CORTEX_URL is not set.
-          Are you running on Lumi and on the q_fiqci node?.
+          Are you running on Lumi and have exported the current device?
           Falling back to fake backend.""")
     # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
 else:
     provider = IQMProvider(Q50_CORTEX_URL, quantum_computer="q50")
     backend = provider.get_backend()
-    circuit = transpile(
-        circuit, backend, layout_method='sabre', optimization_level=3,
-    )
+
+circuit = transpile(
+    circuit, backend, layout_method='sabre', optimization_level=3,
+)
 
 # Retrieving backend information
 # print(f'Native operations: {backend.operation_names}')
