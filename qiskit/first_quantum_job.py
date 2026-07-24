@@ -41,17 +41,8 @@ circuit = transpile(
 
 job = backend.run(circuit, shots=shots)
 result = job.result()
-exp_result = job.result()._get_experiment(circuit)
-# You can retrieve the job at a later date with backend.retrieve_job(job_id)
-# Uncomment the following lines to get more information about your submitted job
+
 print("Job ID: ", job.job_id())
-"""
-try:
-    print(job.result().results[0].metadata['input_qubit_map'])
-except AttributeError:
-    print(job.result().request.qubit_mapping)
-"""
-# print(result.results[0].shots)
 
 counts = result.get_counts()
 print(counts)
