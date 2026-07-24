@@ -46,17 +46,42 @@ tomography_circuit = StateTomography(circuit, physical_qubits=[0, 2])
 # The circuit metadata can be printed like this
 print(tomography_circuit.circuits()[0].metadata)
 
-
+# Two IQM-specific workarounds are needed to make the experiment run on IQM
+# backends (both the fake backend and the real backends):
+#
+# 1. backend_run=True
+#    By default qiskit-experiments executes circuits through BackendSamplerV2,
+#    which requests per-shot `memory`. IQM backends ignore that option (you will
+#    see a "Unknown backend option(s): {'memory': True, ...}" warning), so the
+#    sampler receives no per-shot data and returns all-zero results ({'00': N}
+#    for every basis). Passing backend_run=True runs the circuits via
+#    backend.run() instead, which IQM supports correctly.
+#
+# 2. analysis=None + manual metadata restoration
+#    IQM's transpiler resets circuit.metadata to {} while routing, so the
+#    tomography analysis loses the measurement-basis metadata it needs and fails
+#    with KeyError: 'cond_clbits'. We defer the analysis, restore the metadata
+#    from the original circuits (results come back in submission order), then
+#    run the analysis by hand.
 tomography_data = tomography_circuit.run(
-    backend, seed_simulation=42, shots=100,
+    backend, seed_simulation=42, shots=1000,
+    backend_run=True, analysis=None,
 ).block_for_results()
 jobs = tomography_data.jobs()
 print(jobs)
 print(jobs[0].status())
 
+# Restore the per-circuit metadata that IQM's transpilation stripped.
+for datum, circ in zip(tomography_data.data(), tomography_circuit.circuits()):
+    if not datum.get("metadata"):
+        datum["metadata"] = circ.metadata
 
-# As of qiskit-experiments 0.9, analysis_results() returns a pandas DataFrame
-# when dataframe=True (the implicit single-result return is deprecated).
+# Now the density-matrix analysis has everything it needs.
+tomography_circuit.analysis.run(tomography_data).block_for_results()
+
+
+# analysis_results() returns a pandas DataFrame when dataframe=True
+# (the implicit single-result return is deprecated).
 state_result = tomography_data.analysis_results(
     "state", dataframe=True,
 ).iloc[0]
