@@ -42,6 +42,7 @@ circuit = transpile(
 job = backend.run(circuit, shots=shots)
 result = job.result()
 
+# You can retrieve the job at a later date with backend.retrieve_job(job_id)
 print("Job ID: ", job.job_id())
 
 counts = result.get_counts()
