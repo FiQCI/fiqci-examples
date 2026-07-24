@@ -59,7 +59,7 @@ print("Job ID: ", job.job_id(), end="\n")  # Retrieving the submitted job id
 # Retrieving the circuit request sent
 print("Circuits: ", job._iqm_job._circuits[0], end="\n")
 print(
-    "Mapping: ", job._iqm_job._parameters.qubit_mapping
+    "Mapping: ", job._iqm_job._parameters.qubit_mapping,
 )
 print("Calibration Set ID: ", exp_result.calibration_set_id, end="\n")
 
