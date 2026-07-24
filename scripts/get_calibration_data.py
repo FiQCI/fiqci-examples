@@ -1,8 +1,9 @@
 import json
 import os
+import sys
 
 import requests
-from iqm.iqm_client import IQMClient  # Requires iqm_client==15.3
+from iqm.iqm_client import IQMClient
 from iqm.qiskit_iqm import IQMProvider
 
 
@@ -39,12 +40,25 @@ def get_calibration_data(client: IQMClient, calibration_set_id=None, filename: s
     return data
 
 
-Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
-if not Q50_CORTEX_URL:
-    raise ValueError('Environment variable Q50_CORTEX_URL is not set')
+def _choose_target(arg: str):
+    key = arg.lower()
+    if key == 'q50':
+        return os.getenv('Q50_CORTEX_URL'), 'q50'
+    if key == 'q20':
+        return os.getenv('Q20_CORTEX_URL'), 'radiance20'
+    raise ValueError("Invalid target. Choose one of: q20, q50")
 
-quantum_computer = "q50"
-provider = IQMProvider(Q50_CORTEX_URL, quantum_computer=quantum_computer)
+
+if len(sys.argv) < 2:
+    raise ValueError('Usage: get_calibration_data.py <q20|q50|radiance20>')
+
+url_env, quantum_computer = _choose_target(sys.argv[1])
+if not url_env:
+    raise ValueError('Environment variable for chosen target is not set')
+
+provider = IQMProvider(url_env, quantum_computer=quantum_computer)
 backend = provider.get_backend()
 
-calibration_data = get_calibration_data(backend.client)
+filename = "cals.json"
+
+calibration_data = get_calibration_data(backend.client, filename=filename)

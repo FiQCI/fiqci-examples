@@ -47,15 +47,15 @@ def calculate_success_probability(counts: dict, shots: int, desired_state: str) 
 def main():
 
     backend = IQMFakeAdonis()
-    HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-    if not HELMI_CORTEX_URL:
-        print("""Environment variable HELMI_CORTEX_URL is not set.
-              Are you running on Lumi and on the q_fiqci node?.
+    Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+    if not Q50_CORTEX_URL:
+        print("""Environment variable Q50_CORTEX_URL is not set.
+              Are you running on Lumi and have exported the correct device?
               Falling back to fake backend.""")
-        # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+        # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
     else:
-        provider = IQMProvider(HELMI_CORTEX_URL)
+        provider = IQMProvider(Q50_CORTEX_URL, quantum_computer="q50")
         backend = provider.get_backend()
 
     shots = 1000

@@ -17,21 +17,22 @@ circuit.measure_all()
 # Uncomment if you wish to print the circuit
 # print(circuit.draw())
 
-# Set up the Helmi backend
+# Set up the Q50 backend
 backend = IQMFakeAdonis()
-HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-if not HELMI_CORTEX_URL:
-    print("""Environment variable HELMI_CORTEX_URL is not set.
-          Are you running on Lumi and on the q_fiqci node?.
+Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+if not Q50_CORTEX_URL:
+    print("""Environment variable Q50_CORTEX_URL is not set.
+          Are you running on Lumi and have exported the current device?
           Falling back to fake backend.""")
-    # raise ValueError("Environment variable HELMI_CORTEX_URL is not set")
+    # raise ValueError("Environment variable Q50_CORTEX_URL is not set")
 
 else:
-    provider = IQMProvider(HELMI_CORTEX_URL)
+    provider = IQMProvider(Q50_CORTEX_URL, quantum_computer="q50")
     backend = provider.get_backend()
-    circuit = transpile(
-        circuit, backend, layout_method='sabre', optimization_level=3,
-    )
+
+circuit = transpile(
+    circuit, backend, layout_method='sabre', optimization_level=3,
+)
 
 # Retrieving backend information
 # print(f'Native operations: {backend.operation_names}')
@@ -40,17 +41,19 @@ else:
 
 job = backend.run(circuit, shots=shots)
 result = job.result()
-exp_result = job.result()._get_experiment(circuit)
+
+# Fetch some extra job information from the result object
+exp_res = result._get_experiment()
+
+print(
+    "Calibration Set ID: ", exp_res.calibration_set_id,
+)  # Retrieving the current calibration set id.
+print(exp_res.shots)  # Retrieving the number of requested shots.
+print(exp_res.header)
+
+
 # You can retrieve the job at a later date with backend.retrieve_job(job_id)
-# Uncomment the following lines to get more information about your submitted job
 print("Job ID: ", job.job_id())
-"""
-try:
-    print(job.result().results[0].metadata['input_qubit_map'])
-except AttributeError:
-    print(job.result().request.qubit_mapping)
-"""
-# print(result.results[0].shots)
 
 counts = result.get_counts()
 print(counts)

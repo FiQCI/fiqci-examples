@@ -16,8 +16,8 @@ def fold_func(x: np.ndarray) -> str:
     return ''.join(map(lambda x: chr(x + ord('0')), x))
 
 
-HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-sampler = IQMSampler(HELMI_CORTEX_URL)
+Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+sampler = IQMSampler(Q50_CORTEX_URL, quantum_computer="q50")
 device = sampler.device
 
 q1, q2 = cirq.NamedQubit('Alice'), cirq.NamedQubit('Bob')

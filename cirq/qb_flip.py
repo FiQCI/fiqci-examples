@@ -1,5 +1,5 @@
 """
-A more advanced example to flip qubits with either Helmi or the simulator.
+A more advanced example to flip qubits with either q50 or the simulator.
 """
 import argparse
 import os
@@ -21,8 +21,8 @@ def get_args():
         description="Qubit flipping options", formatter_class=RawTextHelpFormatter,
     )
     parser.add_argument(
-        "--backend", choices=['helmi', 'simulator'],
-        help="Backend to use: 'helmi' or 'simulator'", required=True,
+        "--backend", choices=['q50', 'simulator'],
+        help="Backend to use: 'q50' or 'simulator'", required=True,
     )
     parser.add_argument(
         "--qubits", type=int, nargs='+',
@@ -75,13 +75,13 @@ def flip_qubits(qubits: list[int], backend: str, shots: int, verbose: bool):
     """
     Function to run the flip circuit
     """
-    if backend == 'helmi':
-        HELMI_CORTEX_URL = os.getenv('HELMI_CORTEX_URL')
-        if not HELMI_CORTEX_URL:
+    if backend == 'q50':
+        Q50_CORTEX_URL = os.getenv('Q50_CORTEX_URL')
+        if not Q50_CORTEX_URL:
             raise ValueError(
-                "Environment variable HELMI_CORTEX_URL is not set",
+                "Environment variable Q50_CORTEX_URL is not set",
             )
-        sampler = IQMSampler(HELMI_CORTEX_URL)
+        sampler = IQMSampler(Q50_CORTEX_URL, quantum_computer="q50")
     else:
         sampler = cirq.Simulator()
 

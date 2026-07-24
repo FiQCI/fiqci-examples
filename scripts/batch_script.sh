@@ -1,21 +1,21 @@
-#!/bin/bash -l
+#!/bin/bash
 
-#SBATCH --job-name=helmijob   # Job name
-#SBATCH --output=helmijob.o%j # Name of stdout output file
-#SBATCH --error=helmijob.e%j  # Name of stderr error file
-#SBATCH --partition=q_fiqci   # Partition (queue) name
-#SBATCH --ntasks=1            # One task (process)
+#SBATCH --job-name=quantumjob   # Job name
+#SBATCH --account=project_<id>  # Project for billing (slurm_job_account)
+#SBATCH --partition=small   # Partition (queue) name
+#SBATCH --ntasks=1              # One task (process)
+#SBATCH --mem-per-cpu=2G       # memory allocation
 #SBATCH --cpus-per-task=1     # Number of cores (threads)
-#SBATCH --time=00:15:00       # Run time (hh:mm:ss)
-#SBATCH --account=project_xxx # Project for billing
-#SBATCH --mem-per-cpu=1G      # Memory per CPU
+#SBATCH --time=00:15:00         # Run time (hh:mm:ss)
 
 module use /appl/local/quantum/modulefiles
-module load helmi_qiskit  # Load the module to use qiskit on Helmi
+module load fiqci-vtt-qiskit
 
-# module load helmi_cirq    # Load the module to use cirq on Helmi
+# or for cirq, use the following instead of the above two lines
+# module use /appl/local/quantum/modulefiles
+# module load fiqci-vtt-cirq
 
-# Save the job ID to a file for later reference
-echo $SLURM_JOB_ID >> job_id.txt
+export DEVICES=("Q50") # available devices: Q50, radiance20
+source $RUN_SETUP
 
-python -u $1
+python -u "$@"
