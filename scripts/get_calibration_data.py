@@ -59,4 +59,6 @@ if not url_env:
 provider = IQMProvider(url_env, quantum_computer=quantum_computer)
 backend = provider.get_backend()
 
-calibration_data = get_calibration_data(backend.client)
+filename = "cals.json"
+
+calibration_data = get_calibration_data(backend.client, filename=filename)
