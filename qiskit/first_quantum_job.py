@@ -42,6 +42,16 @@ circuit = transpile(
 job = backend.run(circuit, shots=shots)
 result = job.result()
 
+# Fetch some extra job information from the result object
+exp_res = result._get_experiment()  
+
+print(
+    "Calibration Set ID: ", exp_res.calibration_set_id
+)  # Retrieving the current calibration set id.
+print(exp_res.shots)  # Retrieving the number of requested shots.
+print(exp_res.header)
+
+
 # You can retrieve the job at a later date with backend.retrieve_job(job_id)
 print("Job ID: ", job.job_id())
 
