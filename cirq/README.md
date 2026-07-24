@@ -1,4 +1,4 @@
-# FiQCI Ciqr Examples
+# FiQCI Cirq Examples
 
 Examples made with Cirq which are compatible with the FiQCI quantum computers (Aalto Q20 and VTT Q50). These examples were made with the aim to show how simple quantum jobs can be run on FiQCI devices and to demonstate the differences in results between the simulator and a real quantum computer. Therefore each example has the option to run with a simulator or with the Quantum Computer. Running jobs on an actual quantum computer requires submitting of jobs through the LUMI supercomputer. Alternatively one can access the quantum computers through the LUMI web interface, where it is possible to access them from a Jupyter notebook enviroment.
 ## Example list
